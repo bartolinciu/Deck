@@ -1,5 +1,10 @@
 .main{
-	width: 300;
-	height: 150;
-	margin: 10;
+	width: 22%;
+	height: 21%;
+	margin-left: 2%;
+	margin-top: 2%;
+	margin-bottom: 0;
+	margin-right: 0;
+	display: inline-block;
+	vertical-align: top;
 }

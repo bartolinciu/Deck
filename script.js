@@ -1,7 +1,10 @@
 
 let ws;
 function onmessage(message){
-	console.log(message.data);
+	let labels = JSON.parse(message.data)
+	for( let i=1; i <= 16; i++ ){
+		document.getElementById("Button"+i).innerText = labels[i-1];
+	}
 }
 
 function init(){
@@ -10,11 +13,15 @@ function init(){
 	console.log(url);
 	url = url.substr( url.startsWith( "https://" ) ? 8: url.startsWith( "http://" ) ? 7 : 0 )
 	console.log(url);
-	url = url.substr( 0, url.length - 10 );
+	url = url.substr( 0, url.length - 15 );
 	console.log(url);
 
-	ws = new WebSocket("ws://192.168.1.163:8765");
+	ws = new WebSocket("ws://" + url + ":8765");
 	ws.onmessage = onmessage;
+	ws.onopen = function(){
+		ws.send("get");
+	}
+	
 	//alert(ws);
 }
 

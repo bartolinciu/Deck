@@ -1,0 +1,44 @@
+{
+	"switch": [
+		{"action": "press",
+		"key":"alt_l"},
+		{"action": "press",
+		"key":"tab"},
+		{"action":"release",
+		"key":"tab"},
+		{"action":"release",
+		"key":"alt_l"}
+	],
+
+	"play":[
+		{"action":"press",
+		"key": "m"},
+		{"action" : "release",
+		"key": "m"},
+
+		{"action":"press",
+		"key": "!"},
+		{"action" : "release",
+		"key": "!"},
+
+		{"action":"press",
+		"key": "p"},
+		{"action" : "release",
+		"key": "p"},
+
+		{"action":"press",
+		"key": "l"},
+		{"action" : "release",
+		"key": "l"},
+
+		{"action":"press",
+		"key": "a"},
+		{"action" : "release",
+		"key": "a"},
+
+		{"action":"press",
+		"key": "y"},
+		{"action" : "release",
+		"key": "y"}
+	]
+}

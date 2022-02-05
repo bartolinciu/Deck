@@ -1,0 +1,122 @@
+alt = 0
+A generic Alt key. This is a modifier.
+
+alt_gr = 0
+The AltGr key. This is a modifier.
+
+alt_l = 0
+The left Alt key. This is a modifier.
+
+alt_r = 0
+The right Alt key. This is a modifier.
+
+backspace = 0
+The Backspace key.
+
+caps_lock = 0
+The CapsLock key.
+
+cmd = 0
+A generic command button. On PC platforms, this corresponds to the Super key or Windows key, and on Mac it corresponds to the Command key. This may be a modifier.
+
+cmd_l = 0
+The left command button. On PC platforms, this corresponds to the Super key or Windows key, and on Mac it corresponds to the Command key. This may be a modifier.
+
+cmd_r = 0
+The right command button. On PC platforms, this corresponds to the Super key or Windows key, and on Mac it corresponds to the Command key. This may be a modifier.
+
+ctrl = 0
+A generic Ctrl key. This is a modifier.
+
+ctrl_l = 0
+The left Ctrl key. This is a modifier.
+
+ctrl_r = 0
+The right Ctrl key. This is a modifier.
+
+delete = 0
+The Delete key.
+
+down = 0
+A down arrow key.
+
+end = 0
+The End key.
+
+enter = 0
+The Enter or Return key.
+
+esc = 0
+The Esc key.
+
+f1 = 0
+The function keys. F1 to F20 are defined.
+
+home = 0
+The Home key.
+
+insert = 0
+The Insert key. This may be undefined for some platforms.
+
+left = 0
+A left arrow key.
+
+media_next = 0
+The next track button.
+
+media_play_pause = 0
+The play/pause toggle.
+
+media_previous = 0
+The previous track button.
+
+media_volume_down = 0
+The volume down button.
+
+media_volume_mute = 0
+The volume mute button.
+
+media_volume_up = 0
+The volume up button.
+
+menu = 0
+The Menu key. This may be undefined for some platforms.
+
+num_lock = 0
+The NumLock key. This may be undefined for some platforms.
+
+page_down = 0
+The PageDown key.
+
+page_up = 0
+The PageUp key.
+
+pause = 0
+The Pause/Break key. This may be undefined for some platforms.
+
+print_screen = 0
+The PrintScreen key. This may be undefined for some platforms.
+
+right = 0
+A right arrow key.
+
+scroll_lock = 0
+The ScrollLock key. This may be undefined for some platforms.
+
+shift = 0
+A generic Shift key. This is a modifier.
+
+shift_l = 0
+The left Shift key. This is a modifier.
+
+shift_r = 0
+The right Shift key. This is a modifier.
+
+space = 0
+The Space key.
+
+tab = 0
+The Tab key.
+
+up = 0
+An up arrow key.
