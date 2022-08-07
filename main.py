@@ -73,7 +73,7 @@ async def updateLayout( websocket, l ):
 	except:
 		pass
 	"""
-	layout = loadLayout(l)
+	layout = loadLayout("layouts/" + l)
 	msg = []
 	for button, content in enumerate( layout ):
 		msg.append( layout[content]["name"])
@@ -94,7 +94,7 @@ def startHTTP():
 	httpd.handle_timeout = handle_timeout
 	#httpd.socket = ssl.wrap_socket( httpd.socket, server_side = True, certfile = 'localhost.pem', ssl_version=ssl.PROTOCOL_TLS )
 	while server_running:
-		print("handling request")
+		#print("handling request")
 		httpd.handle_request()
 http_thread = threading.Thread( target = startHTTP )
 http_thread.start()
