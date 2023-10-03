@@ -1,9 +1,91 @@
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  let expires = "expires="+d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function checkCookie() {
+  let user = getCookie("username");
+  if (user != "") {
+    alert("Welcome again " + user);
+  } else {
+    user = prompt("Please enter your name:", "");
+    if (user != "" && user != null) {
+      setCookie("username", user, 365);
+    }
+  }
+}
+
 
 let ws;
+let pongReceived = false;
+let pingSent = false;
 function onmessage(message){
-	let labels = JSON.parse(message.data)
+	if( message.data == "pong" ){
+		pongReceived = true;
+		return;
+	}
+
+	if(message.data == "reject"){
+		authorize();
+		return;
+	}
+
+	splitted_message = message.data.split(":")
+
+	if( splitted_message[0] == "accept" )
+	{
+		setCookie( "uuid", splitted_message[1], 365 );
+		return;
+	}
+	//alert(message.data);
+	let labels = JSON.parse(message.data);
 	for( let i=1; i <= 16; i++ ){
-		document.getElementById("Button"+i).innerText = labels[i-1];
+		document.getElementById("Button"+i).innerHTML = labels[i-1];
+		//document.getElementById("Button"+i).innerHTML += "<img src = \"img.png\">";
+	}
+}
+
+
+function ping(){
+	if( pingSent && !pongReceived ){
+		setTimeout(init, 5000);
+		return;
+	}
+	ws.send("ping");
+	pingSent = true;
+	pongReceived = false;
+	setTimeout(ping, 1000);
+}
+
+function authorize(){
+	passcode = prompt("Enter pairing code");
+	ws.send( "authorize:" + passcode );
+}
+
+function onopen(event){
+	let uuid = getCookie("uuid");
+	if( uuid == "" ){
+		authorize();
+	}
+	else{
+		ws.send( "identify:" + uuid );
 	}
 }
 
@@ -18,11 +100,12 @@ function init(){
 
 	ws = new WebSocket("ws://" + url + ":8765");
 	ws.onmessage = onmessage;
-	ws.onopen = function(){
-		ws.send("get");
-	}
-	
+	ws.onopen = onopen;
+
 	//alert(ws);
+
+	pingSent = false;
+	setTimeout(ping, 1000);
 }
 
 function Click(id){

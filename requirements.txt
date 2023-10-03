@@ -1,0 +1,3 @@
+websocket
+pyqt5
+qrcode
