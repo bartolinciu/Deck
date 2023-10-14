@@ -1,44 +1,118 @@
 {
 	"switch": [
-		{"action": "press",
-		"key":"alt_l"},
-		{"action": "press",
-		"key":"tab"},
-		{"action":"release",
-		"key":"tab"},
-		{"action":"release",
-		"key":"alt_l"}
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "alt_l"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "tab"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "tab"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "alt_l"
+		}
 	],
-
-	"play":[
-		{"action":"press",
-		"key": "m"},
-		{"action" : "release",
-		"key": "m"},
-
-		{"action":"press",
-		"key": "!"},
-		{"action" : "release",
-		"key": "!"},
-
-		{"action":"press",
-		"key": "p"},
-		{"action" : "release",
-		"key": "p"},
-
-		{"action":"press",
-		"key": "l"},
-		{"action" : "release",
-		"key": "l"},
-
-		{"action":"press",
-		"key": "a"},
-		{"action" : "release",
-		"key": "a"},
-
-		{"action":"press",
-		"key": "y"},
-		{"action" : "release",
-		"key": "y"}
+	"play": [
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "m"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "m"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "!"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "!"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "p"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "p"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "l"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "l"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "a"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "a"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "y"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "release",
+			"key": "y"
+		}
+	],
+	"test": [
+		{
+			"delay": 0,
+			"device": "mouse",
+			"action": "position",
+			"x": 250,
+			"y": 250
+		},
+		{
+			"delay": 2.0,
+			"device": "mouse",
+			"action": "position",
+			"x": 500,
+			"y": 500
+		}
 	]
 }
