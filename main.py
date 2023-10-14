@@ -16,18 +16,11 @@ from Deck.DeckDevice import DeckDevice
 from Deck.DeckController import DeckController
 from Deck.Gui.Layout import LayoutsPage
 from Deck.Gui.Device import DevicesPage
+from Deck.Gui.Macros import MacrosPage
+from Deck.Gui.Settings import SettingsPage
 
 import queue
 #import win32gui, win32process, psutil
-
-
-
-
-class SettingsWidget(QWidget):
-	def __init__(self, *args, **kwargs):
-		super(SettingsWidget, self).__init__(*args, **kwargs)
-		
-
 
 
 class MainWindow(QMainWindow):
@@ -41,17 +34,20 @@ class MainWindow(QMainWindow):
 		tabSelector = QTabBar()
 		tabSelector.insertTab( 0, "Devices" )
 		tabSelector.insertTab( 1, "Layouts" )
-		tabSelector.insertTab( 2, "Settings")
+		tabSelector.insertTab( 2, "Macros" )
+		tabSelector.insertTab( 3, "Settings")
 
 
 		self.devicesWidget = DevicesPage()
 
 		layoutsWidget = LayoutsPage()
-		settingsWidget = SettingsWidget()
+		macrosWidget = MacrosPage()
+		settingsWidget = SettingsPage()
 		tabLayout = QStackedLayout()
 
 		tabLayout.addWidget( self.devicesWidget )
 		tabLayout.addWidget( layoutsWidget )
+		tabLayout.addWidget( macrosWidget )
 		tabLayout.addWidget( settingsWidget )
 
 		
