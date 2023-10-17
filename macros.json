@@ -99,7 +99,7 @@
 			"key": "y"
 		}
 	],
-	"test": [
+	"test2": [
 		{
 			"delay": 0,
 			"device": "mouse",
@@ -113,6 +113,62 @@
 			"action": "position",
 			"x": 500,
 			"y": 500
+		}
+	],
+	"New macro": [
+		{
+			"delay": 0.0,
+			"device": "mouse",
+			"action": "position",
+			"x": 100,
+			"y": 100
+		},
+		{
+			"delay": 0.5,
+			"device": "mouse",
+			"action": "position",
+			"x": 1000,
+			"y": 100
+		},
+		{
+			"delay": 0.5,
+			"device": "mouse",
+			"action": "position",
+			"x": 1000,
+			"y": 600
+		},
+		{
+			"delay": 0.5,
+			"device": "mouse",
+			"action": "position",
+			"x": 100,
+			"y": 600
+		}
+	],
+	"New macro (1)": [
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "4"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "3"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "2"
+		},
+		{
+			"delay": 0,
+			"device": "keyboard",
+			"action": "press",
+			"key": "1"
 		}
 	]
 }

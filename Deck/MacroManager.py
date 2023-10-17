@@ -30,7 +30,10 @@ class MacroManager:
 		return self.macros.keys()
 
 	def set_macro(self, name, macro):
-		self.macros[name] = macro
+		if macro != None:
+			self.macros[name] = macro
+		else:
+			self.macros.pop(name)
 		with open( "macros.json", "wt" ) as f:
 			data = json.dumps( self.macros, indent = "\t" )
 			f.write( data )

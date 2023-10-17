@@ -90,6 +90,12 @@ class LayoutWidget(QWidget):
 		#print(self.layout)
 		layout_manager.update_layout(self.layout_name, self.layout)
 
+	def showEvent(self, event):
+		self.edited_by_code = True
+		self.action_selected()
+		self.edited_by_code = False
+		super(LayoutWidget, self).showEvent(event)
+
 	def action_selected(self):
 		print("action selected", self.edited_by_code)
 		try:

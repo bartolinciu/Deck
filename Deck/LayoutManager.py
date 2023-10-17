@@ -9,6 +9,39 @@ class LayoutManager:
 		self.loaded_layouts = {}
 		self.update_listeners = []
 
+	def update_parameters( self, new_parameter, filter = lambda layout_name, layout, button: True ):
+		for layout_name in self.layouts:
+			if layout_name in self.loaded_layouts:
+				layout = self.get_layout(layout_name)
+				changed = False
+				for button in layout:
+					try:
+						if filter( layout_name, layout, layout[button] ):
+							changed = True
+							layout[button]["parameter"] = new_parameter
+					except KeyError:
+						pass
+				
+				if changed:
+					self.update_layout( layout_name, layout )
+			else:
+				with open( LayoutManager.prefix+layout_name+LayoutManager.suffix ) as f:
+					data = f.read()
+					layout = json.loads(data)
+					changed = False
+					for button in layout:
+						try:
+							if filter( layout_name, layout, layout[button] ):
+								changed = True
+								layout[button]["parameter"] = new_parameter
+						except KeyError:
+							pass
+					
+					if changed:
+						self.update_layout( layout_name, layout, skip_cache = True )
+
+
+
 	def get_layout(self, id):
 		if id in self.loaded_layouts:
 			return self.loaded_layouts[id]
@@ -37,8 +70,9 @@ class LayoutManager:
 	def get_layout_list(self):
 		return self.layouts
 
-	def update_layout( self, layout_name, layout ):
-		self.loaded_layouts[layout_name] = layout
+	def update_layout( self, layout_name, layout, skip_cache = False ):
+		if not skip_cache:
+			self.loaded_layouts[layout_name] = layout
 
 		with open( LayoutManager.prefix+layout_name+LayoutManager.suffix, "wt" ) as f:
 			data = json.dumps(layout, indent="\t")
