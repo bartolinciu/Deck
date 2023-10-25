@@ -36,6 +36,7 @@ function checkCookie() {
 let ws;
 let pongReceived = false;
 let pingSent = false;
+let reconnect = false;
 function onmessage(message){
 	if( message.data == "pong" ){
 		pongReceived = true;
@@ -45,6 +46,10 @@ function onmessage(message){
 	if(message.data == "reject"){
 		authorize();
 		return;
+	}
+
+	if( message.data == "reconnect" ){
+		reconnect = true;
 	}
 
 	splitted_message = message.data.split(":")
@@ -89,6 +94,12 @@ function onopen(event){
 	}
 }
 
+function onclose(event){
+	if( reconnect ){
+		setTimeout( init, 100 );
+	}
+}
+
 function init(){
 	//alert("Hello");
 	let url = document.getElementById( "script" ).src;
@@ -101,11 +112,12 @@ function init(){
 	ws = new WebSocket("ws://" + url + ":8765");
 	ws.onmessage = onmessage;
 	ws.onopen = onopen;
+	ws.onclose = onclose;
 
 	//alert(ws);
 
-	pingSent = false;
-	setTimeout(ping, 1000);
+	//pingSent = false;
+	//setTimeout(ping, 1000);
 }
 
 function Click(id){

@@ -1,3 +1,4 @@
+
 import http.server, ssl
 import asyncio
 import websockets
@@ -14,6 +15,8 @@ class DeckServer:
 		self.interfaces = interfaces
 		self.threads = []
 		self.servers = []
+		self.restart = False
+		self.stopped = False
 		for i,interface in enumerate(interfaces):
 			server_address = (interface, port)
 			httpd = http.server.ThreadingHTTPServer( server_address, http.server.SimpleHTTPRequestHandler )
@@ -25,8 +28,7 @@ class DeckServer:
 			self.servers.append(httpd)
 			self.threads.append(http_thread)
 			#httpd.socket = ssl.wrap_socket( httpd.socket, server_side = True, certfile = 'localhost.pem', ssl_version=ssl.PROTOCOL_TLS )
-		
-		
+
 
 	def addOnConnectListener( self, listener, priority ):
 		self.onConnectListeners.append( (priority, listener) )
@@ -39,7 +41,7 @@ class DeckServer:
 		print("stopping http server at interface:", self.interfaces[i])
 
 
-	def start(self):
+	def run(self):
 		self.server_running = True
 		for thread in self.threads:
 			thread.start()
@@ -48,10 +50,10 @@ class DeckServer:
 			asyncio.run( self.serve_websocket() ) 
 		except KeyboardInterrupt:
 			self.server_running = False
-		print( "websocket server stopped" )
 		for thread in self.threads:
 			thread.join()
 		print("http server stopped")
+		self.stopped = True
 
 	async def serve_websocket(self):
 		print("starting websocket server")
@@ -90,5 +92,11 @@ class DeckServer:
 			self.devices.remove(device)	
 			device.on_disconnect()
 
-	def stop(self):
+	def stop(self, reconnect = False):
+		if reconnect:
+			for device in self.devices:
+				device.disconnect(reconnect = True)
 		self.server_running = False
+
+	def has_stopped(self):
+		return self.stopped

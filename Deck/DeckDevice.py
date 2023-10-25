@@ -22,11 +22,13 @@ class DeckDevice:
 		self.config.set_layout(layout_name)
 		await self._send_message( json.dumps( [ layout[button]["name"] for button in layout ] ) )
 
-	def disconnect(self):
-		self.loop.create_task( self.disconnect_async() ) 
+	def disconnect(self, reconnect = False):
+		self.loop.create_task( self.disconnect_async(reconnect) ) 
 
-	async def disconnect_async(self):
+	async def disconnect_async(self, reconnect):
 		for socket in self.websockets:
+			if reconnect:
+				await socket.send("reconnect")
 			await socket.close()
 		
 	async def _send_message(self, message):
@@ -83,7 +85,7 @@ class DeckDevice:
 
 		if  command == "identify":
 			uuid = argument
-			print("device identified with uuid:", uuid)
+			print( "connections list:", self.websockets )
 			try:
 				self.config = DeviceManager.device_manager.get_config( uuid )
 				self.ready = True
