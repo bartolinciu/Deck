@@ -33,11 +33,11 @@ class MainWindow(QMainWindow):
 		self.setWindowTitle( "Deck" )
 		self.controller = controller
 		
-		tabSelector = QTabBar()
-		tabSelector.insertTab( 0, "Devices" )
-		tabSelector.insertTab( 1, "Layouts" )
-		tabSelector.insertTab( 2, "Macros" )
-		tabSelector.insertTab( 3, "Settings")
+		self.tabSelector = QTabBar()
+		self.tabSelector.insertTab( 0, "Devices" )
+		self.tabSelector.insertTab( 1, "Layouts" )
+		self.tabSelector.insertTab( 2, "Macros" )
+		self.tabSelector.insertTab( 3, "Settings")
 
 
 		self.devicesWidget = DevicesPage()
@@ -59,11 +59,11 @@ class MainWindow(QMainWindow):
 		tabWidget = QWidget()
 		tabWidget.setLayout(tabLayout)
 
-		tabSelector.currentChanged.connect( tabLayout.setCurrentIndex )
+		self.tabSelector.currentChanged.connect( tabLayout.setCurrentIndex )
 
 		mainLayout = QVBoxLayout()
 
-		mainLayout.addWidget(tabSelector)
+		mainLayout.addWidget(self.tabSelector)
 		mainLayout.addWidget(tabWidget)
 
 		widget = QWidget()
@@ -78,12 +78,49 @@ class MainWindow(QMainWindow):
 
 		self.controller.set_network_configuration( settings )
 
+	def show( self, page = None ):
+		if page != None:
+			self.tabSelector.setCurrentIndex( page )
+		QMainWindow.show( self )
 
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
+	app.setQuitOnLastWindowClosed(False)
+
+
 	controller = DeckController()
 	window = MainWindow(controller)
+
+	icon = QIcon("icon.ico")
+
+	tray = QSystemTrayIcon()
+	tray.setIcon(icon)
+	tray.setVisible(True)
+
+	tray.activated.connect(lambda reason: window.show() if reason != QSystemTrayIcon.Context else None  )
+
+	menu = QMenu()
+	option1 = QAction("Open Deck")
+	option1.triggered.connect( lambda: window.show() )
+	option2 = QAction("Devices")
+	option2.triggered.connect( lambda: window.show(0) )
+	option3 = QAction("Layouts")
+	option3.triggered.connect( lambda: window.show(1) )
+	option4 = QAction("Macros")
+	option4.triggered.connect(lambda:window.show(2))
+	option5 = QAction("Settings")
+	option5.triggered.connect(lambda:window.show(3))
+	menu.addAction( option1 )
+	menu.addAction( option2 )
+	menu.addAction( option3 )
+	menu.addAction( option4 )
+	menu.addAction( option5 )
+
+	quit = QAction("Exit Deck")
+	quit.triggered.connect(app.quit)
+	menu.addAction(quit)
+	tray.setContextMenu(menu)
 
 	controller.device_delegate = window.devicesWidget
 
