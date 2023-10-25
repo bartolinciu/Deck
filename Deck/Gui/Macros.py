@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from Deck.MacroManager import manager
+from Deck.LayoutManager import layout_manager
 
 import re
 
@@ -21,38 +22,46 @@ class ScrollableButtonSelector(QScrollArea):
 		self.setWidget( self.content )
 
 		self.current_button = -1
-		self.number_of_buttons = 0
+		
 
 	def edit_button( self, i, text, data ):
-
 		button = self.layout.itemAt(i).widget()
 		newButton = QPushButton(text)
 		newButton.setCheckable(True)
 		newButton.setChecked( button.isChecked() )
-		newButton.pressed.connect( lambda i = i, data = data: self.button_pressed(i, data) )
+		newButton.pressed.connect( lambda button = newButton, data = data: self.button_pressed( button, data) )
 		button.deleteLater()
 		self.layout.insertWidget( i, newButton )
-
-
 
 	def add_button(self, text, data = None):
 		button = QPushButton(text)
 		button.setCheckable(True)
-		button.pressed.connect( lambda i = self.number_of_buttons, data = data: self.button_pressed(i, data) )
+		button.pressed.connect( lambda button = button, data = data: self.button_pressed(button, data) )
 
 		self.layout.addWidget(button)
-		self.number_of_buttons += 1
 
-	def button_pressed(self, i, data):
+	def button_pressed(self, button, data):
 		if self.current_button >= 0:
 			self.layout.itemAt( self.current_button ).widget().setChecked(False)
+
+		i = self.layout.indexOf(button)
 
 		self.current_button = i
  
 		self.button_selected.emit(i, data)
 
+	def remove_item( self, i ):
+		self.layout.itemAt(i).widget().deleteLater()
+		if i == self.current_button:
+			self.current_button = -1
+
+	def move_button( self, start, end ):
+		button = self.layout.itemAt( start ).widget()
+		self.layout.insertWidget( end, button )
+		if start == self.current_button:
+			self.current_button = end
+
 	def clear(self):
-		self.number_of_buttons = 0
 		for i in range( self.layout.count() ):
 			self.layout.itemAt( i ).widget().deleteLater()
 
@@ -84,7 +93,6 @@ class KeyEdit(QLineEdit):
 	key_changed = pyqtSignal( str )
 
 	def on_press(self,key):
-		print(key)
 		event = QEvent(QEvent.User + 4)
 		event.key = key
 		QCoreApplication.postEvent(self, event )
@@ -137,8 +145,6 @@ class KeyEdit(QLineEdit):
 		font.setWeight( QFont.Normal )
 		self.setFont(font)
 
-	
-
 
 class StepProperties(QFrame):
 	properties_changed = pyqtSignal( object )
@@ -149,7 +155,7 @@ class StepProperties(QFrame):
 	flag_y      = 0x10
 	def __init__(self, *args, **kwargs):
 		super( StepProperties, self ).__init__(*args, **kwargs)
-		self.setFrameShape(QFrame.Panel)
+		self.setFrameShape(QFrame.StyledPanel)
 
 		self.triggered_by_code = False
 		self.matcher = re.compile("\s*\\d+([\\.,]\\d{1,2})?")
@@ -397,12 +403,41 @@ class StepProperties(QFrame):
 		self.properties_changed.emit( self.step )
 
 
+class MacroProperties( QFrame ):
+	name_changed = pyqtSignal(str)
+	def __init__( self, *args, **kwargs ):
+		super( MacroProperties, self ).__init__( *args, **kwargs )
+		self.setFrameShape( QFrame.StyledPanel )
 
+		layout = QGridLayout()
+
+		name_label = QLabel("Name")
+		duration_label = QLabel("Total duration")
+
+		self.name = QLineEdit()
+		self.name.editingFinished.connect( self._name_edited )
+		self.duration = QLabel()
+		layout.addWidget( name_label, 0, 0 )
+		layout.addWidget( duration_label, 1, 0 )
+		layout.addWidget( self.name, 0, 1 )
+		layout.addWidget( self.duration, 1, 1 )
+
+		self.setLayout(layout)
+
+	def _name_edited(self):
+		self.name_changed.emit( self.name.text() )
+
+	def set_name(self, name):
+		self.name.setText(name)
+
+	def set_duration( self, duration ):
+		self.duration.setText( str(duration) + "s" )
 
 class MacrosPage(QWidget):
 	def __init__(self, *args, **kwargs):
 		super(MacrosPage, self).__init__( *args, **kwargs )
 		layout = QHBoxLayout()
+		grid = QGridLayout()
 
 		self.macroSelector = ScrollableButtonSelector()
 		self.stepSelector = ScrollableButtonSelector()
@@ -414,10 +449,52 @@ class MacrosPage(QWidget):
 		self.stepSelector.button_selected.connect(self.step_selected)
 
 		self.properties = StepProperties()
+		self.macro_properties = MacroProperties()
+		self.macro_properties.name_changed.connect(self.macro_name_changed)
 
-		layout.addWidget(self.macroSelector)
-		layout.addWidget(self.stepSelector)
-		layout.addWidget(self.properties)
+		macro_controlls = QFrame()
+		macro_controlls.setFrameShape(QFrame.StyledPanel)
+		macro_controlls_layout = QHBoxLayout()
+
+		self.new_macro = QPushButton("\u271a")
+		self.new_macro.clicked.connect(self.create_macro)
+		self.delete_macro_button = QPushButton("\u274c")
+		self.delete_macro_button.clicked.connect(self.delete_macro)
+		macro_controlls_layout.addWidget( self.new_macro )
+		macro_controlls_layout.addWidget( self.delete_macro_button )
+		macro_controlls.setLayout(macro_controlls_layout)
+		grid.addWidget( macro_controlls, 0,0)
+
+
+		step_controlls = QFrame()
+		step_controlls.setFrameShape( QFrame.StyledPanel )
+		step_controlls_layout = QHBoxLayout()
+
+		self.new_step = QPushButton("\u271a")
+		self.new_step.clicked.connect( self.add_step )
+		self.delete_step = QPushButton("\u274c")
+		self.delete_step.clicked.connect( self.remove_step )
+		self.move_step_up_button = QPushButton("\u2191")
+		self.move_step_up_button.clicked.connect(self.move_step_up)
+		self.move_step_down_button = QPushButton("\u2193")
+		self.move_step_down_button.clicked.connect(self.move_step_down)
+
+		step_controlls_layout.addWidget( self.new_step )
+		step_controlls_layout.addWidget( self.delete_step )
+		step_controlls_layout.addWidget( self.move_step_up_button )
+		
+		step_controlls_layout.addWidget( self.move_step_down_button )
+
+		step_controlls.setLayout( step_controlls_layout )
+		grid.addWidget( step_controlls, 0, 1 )
+
+		grid.addWidget(self.macroSelector, 1, 0)
+		grid.addWidget(self.stepSelector, 1, 1)
+		layout.addLayout(grid)
+		self.stack = QStackedLayout()
+		self.stack.addWidget( self.macro_properties )
+		self.stack.addWidget(self.properties)
+		layout.addLayout( self.stack )
 
 		self.properties.properties_changed.connect(self.properties_changed)
 
@@ -425,9 +502,61 @@ class MacrosPage(QWidget):
 
 		self.current_step = -1
 
+	def macro_name_changed( self, name ):
+		manager.set_macro(self.macro_name, None)
+		manager.set_macro(name, self.macro)
+		layout_manager.update_parameters( name, lambda layout_name, layout, button: button["action"] == "executeMacro" and button["parameter"]== self.macro_name )
+		self.macro_name = name
+
+	def move_step_up(self):
+		step = self.macro[self.current_step]
+		self.macro = self.macro[:self.current_step] + self.macro[self.current_step+1:]
+		self.stepSelector.move_button( self.current_step, self.current_step-1 )
+		self.current_step -= 1
+		self.macro.insert( self.current_step, step )
+		manager.set_macro( self.macro_name, self.macro )
+
+
+	def move_step_down(self):
+		step = self.macro[self.current_step]
+		self.macro = self.macro[:self.current_step] + self.macro[self.current_step+1:]
+		self.stepSelector.move_button( self.current_step, self.current_step+1 )
+		self.current_step += 1
+		self.macro.insert( self.current_step, step )
+		manager.set_macro( self.macro_name, self.macro )
+
+	def delete_macro( self ):
+		self.macroSelector.remove_item( self.macroSelector.current_button )
+		manager.set_macro( self.macro_name, None )
+
+	def add_step(self):
+		step = {"delay":0, "device":"keyboard", "action":"press", "key":""}
+		self.macro.append( step )
+		self.stepSelector.add_button( "press", step )
+		manager.set_macro( self.macro_name, self.macro )
+
+	def remove_step(self):
+		self.macro = self.macro[:self.current_step] + self.macro[self.current_step+1:]
+		self.stepSelector.remove_item( self.current_step )
+		manager.set_macro(self.macro_name, self.macro)
+
+
+	def create_macro( self ):
+		name = "New macro"
+		i = 1
+		while name in manager.get_macro_list():
+			name = "New macro (%i)"%i
+			i += 1
+		manager.set_macro( name, [] )
+		self.macroSelector.add_button( name, name )
+
+
 	def macro_selected(self, i, macro_name):
 		self.macro_name = macro_name
 		self.macro = manager.get_macro( macro_name )
+		self.stack.setCurrentIndex(0)
+		self.macro_properties.set_name(macro_name)
+		self.macro_properties.set_duration( sum([step["delay"] for step in self.macro]) )
 		self.stepSelector.clear()
 		for i, step in enumerate(self.macro):
 			text = step["action"] + " "
@@ -439,6 +568,7 @@ class MacrosPage(QWidget):
 			self.stepSelector.add_button( text, step )
 
 	def step_selected(self, i, step ):
+		self.stack.setCurrentIndex(1)
 		self.current_step = i
 		self.properties.set_step(step)
 
