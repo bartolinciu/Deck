@@ -17,15 +17,18 @@ DeckAction = namedtuple( "DeckAction", "name label parameter_type parameter_labe
 class DeckController:
 	actions = {}
 	def __init__(self):
-		self.srv = DeckServer( ["0.0.0.0"], 8080 )
+		with open( os.path.join( os.path.dirname(__file__) , "network.json" ), "rt" ) as f:
+			self.network_configuration = json.loads( f.read() )
+
+		ips = self.get_ips_from_configuration(self.network_configuration)
+		self.srv = DeckServer( ips, 8080 )
 		self.srv.addOnConnectListener( self, 1 )
 		
 		self.device_delegate = None
 		self.running = False
 		self.ready = True
 		LayoutManager.layout_manager.add_layout_update_listener( self, 1 )
-		with open( os.path.join( os.path.dirname(__file__) , "network.json" ), "rt" ) as f:
-			self.network_configuration = json.loads( f.read() )
+		
 
 	def action( label="Action", parameter_type="None", parameter_label="Parameter", parameter_values=[] ):
 		def decorator(function):
@@ -55,10 +58,8 @@ class DeckController:
 	def get_network_configuration(self):
 		return self.network_configuration
 
-	def set_network_configuration(self, settings):
-		self.network_configuration = settings
-		with open( os.path.join( os.path.dirname(__file__) , "network.json" ), "wt") as f:
-			f.write( json.dumps( self.network_configuration, indent = "\t" ) )
+	def get_ips_from_configuration(self, settings):
+		
 		adapters = ifaddr.get_adapters()
 		adapter_dict = {}
 		matcher = re.compile( "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}" )
@@ -77,6 +78,13 @@ class DeckController:
 					for ip in interface["ips"]:
 						if interface["ips"][ip] and ip in adapter_dict[interface["name"]]:
 							ips.append(ip)
+		return ips
+
+	def set_network_configuration(self, settings):
+		self.network_configuration = settings
+		with open( os.path.join( os.path.dirname(__file__) , "network.json" ), "wt") as f:
+			f.write( json.dumps( self.network_configuration, indent = "\t" ) )
+		ips = self.get_ips_from_configuration(settings)
 		self.change_interfaces(ips)
 
 	async def on_message(self, device, message):
