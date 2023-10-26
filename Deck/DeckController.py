@@ -11,7 +11,7 @@ import time
 import os
 import json
 
-DeckAction = namedtuple( "DeckAction", "name label parameter_type parameter_label parameter_values function" )
+DeckAction = namedtuple( "DeckAction", "name label parameters function" )
 
 
 class DeckController:
@@ -30,10 +30,10 @@ class DeckController:
 		LayoutManager.layout_manager.add_layout_update_listener( self, 1 )
 		
 
-	def action( label="Action", parameter_type="None", parameter_label="Parameter", parameter_values=[] ):
+	def action( label="Action", parameters = [] ):
 		def decorator(function):
 			name = function.__name__
-			action = DeckAction( name, label, parameter_type, parameter_label, parameter_values, function )
+			action = DeckAction( name, label, parameters, function )
 			DeckController.actions[ name ] = action
 			print("Discovered action:", name)
 			return function
@@ -95,21 +95,30 @@ class DeckController:
 		message_str = str(message)
 
 		layout = LayoutManager.layout_manager.get_layout( device.get_layout_id() )
-		actionName = layout[str(message)]["action"]
 
-		try:
-			action = self.actions[actionName]
-		except KeyError:
+		if not message_str in layout:
+			print("Button not found:", message_str)
+			return
+
+		button = layout[message_str]
+
+		if not "action" in button:
+			return
+
+		actionName = button["action"]
+			
+		if not actionName in self.actions:
 			print("Invalid action:", actionName)
 			return
 
-		if not action.parameter_type == "None":
-			try: 
-				parameter = layout[str(message)]["parameter"]
-			except KeyError:
+		action = self.actions[actionName]
+
+		if len(action.parameters) > 0:
+			if not "parameters" in button or len(button["parameters"]) != len(action.parameters):
 				print("Missing parameter for action:", actionName)
 				return
-			await action.function( device, parameter ) 
+				
+			await action.function( device, *button["parameters"] ) 
 		else:
 			await action.function(device) 
 

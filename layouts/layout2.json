@@ -1,19 +1,21 @@
 {
 	"1": {
 		"name": "Alt-Tab",
-		"action": "switchWindow",
-		"parameter": ""
+		"action": "executeMacro",
+		"parameters": ["switch"]
 	},
 	"2": {
 		"name": "Layout1",
-		"action": "switch",
-		"parameter": "Layout.json"
+		"action": "loadLayout",
+		"parameters": ["layout"]
 	},
 	"3": {
 		"name": "Button2"
 	},
 	"4": {
-		"name": "Button2"
+		"name": "Button3",
+		"action": "test",
+		"parameters": [true]
 	},
 	"5": {
 		"name": "Button2"
@@ -51,5 +53,4 @@
 	"16": {
 		"name": "Button2"
 	}
-
 }

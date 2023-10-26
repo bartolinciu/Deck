@@ -1,30 +1,38 @@
 {
 	"1": {
 		"name": "Alt-Tab",
-		"action": "macro",
-		"parameter": "switch" 
+		"action": "executeMacro",
+		"parameters": ["switch"]
 	},
 	"2": {
 		"name": "Layout2",
-		"action": "switch",
-		"parameter": "Layout2.json"
+		"action": "loadLayout",
+		"parameters": ["layout2"]
 	},
 	"3": {
 		"name": "play",
-		"action": "macro",
-		"parameter": "play"
+		"action": "executeMacro",
+		"parameters": ["play"]
 	},
 	"4": {
-		"name": ""
+		"name": "Macro test",
+		"action": "executeMacro",
+		"parameters": ["Mouse movement"]
 	},
 	"5": {
-		"name": ""
+		"name": "macro test",
+		"action": "executeMacro",
+		"parameters": ["test2"]
 	},
 	"6": {
-		"name": ""
+		"name": "select",
+		"action": "executeMacro",
+		"parameters": ["New macro"]
 	},
 	"7": {
-		"name": ""
+		"name": "New test",
+		"action": "executeMacro",
+		"parameters": ["New macro (1)"]
 	},
 	"8": {
 		"name": ""
@@ -53,5 +61,4 @@
 	"16": {
 		"name": ""
 	}
-
 }
