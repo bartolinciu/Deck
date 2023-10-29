@@ -70,7 +70,7 @@ class LayoutManager:
 	def get_layout_list(self):
 		return self.layouts
 
-	def update_layout( self, layout_name, layout, skip_cache = False ):
+	def update_layout( self, layout_name, layout, visual_change = True, skip_cache = False ):
 		if not skip_cache:
 			self.loaded_layouts[layout_name] = layout
 
@@ -79,7 +79,7 @@ class LayoutManager:
 			f.write(data)
 
 		for listener in self.update_listeners:
-			listener[1].on_layout_update(layout_name)
+			listener[1].on_layout_update(layout_name, visual_change)
 
 layout_manager = LayoutManager()
 layout_manager.load_layouts()

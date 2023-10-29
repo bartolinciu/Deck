@@ -15,7 +15,7 @@ DeckAction = namedtuple( "DeckAction", "name label parameters function" )
 
 
 class DeckController:
-	actions = {}
+	actions = {  }
 	def __init__(self):
 		with open( os.path.join( os.path.dirname(__file__) , "network.json" ), "rt" ) as f:
 			self.network_configuration = json.loads( f.read() )
@@ -39,11 +39,12 @@ class DeckController:
 			return function
 		return decorator
 
-	def on_layout_update( self, layout_name ):
+	def on_layout_update( self, layout_name, is_visual ):
 		layout = LayoutManager.layout_manager.get_layout(layout_name)
-		for device in self.srv.devices:
-			if device.get_layout_id() == layout_name:
-				device.set_layout( layout_name, layout )
+		if is_visual:
+			for device in self.srv.devices:
+				if device.get_layout_id() == layout_name:
+					device.set_layout( layout_name, layout )
 
 	def change_interfaces( self, interfaces ):
 		self.ready= False
@@ -144,5 +145,9 @@ class DeckController:
 	def stop(self):
 		self.running = False
 		self.srv.stop()
+
+@DeckController.action( label = "None", parameters=[] )
+def none_action(device):
+	pass
 
 from Deck.actions import *
