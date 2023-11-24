@@ -3,6 +3,7 @@ import asyncio
 from collections import namedtuple
 from Deck import LayoutManager
 from Deck import DeviceManager
+from Deck.ImageManager import manager as ImageManager
 import threading
 
 import ifaddr
@@ -23,12 +24,23 @@ class DeckController:
 		ips = self.get_ips_from_configuration(self.network_configuration)
 		self.srv = DeckServer( ips, 8080 )
 		self.srv.addOnConnectListener( self, 1 )
+
 		
 		self.device_delegate = None
 		self.running = False
 		self.ready = True
 		LayoutManager.layout_manager.add_layout_update_listener( self, 1 )
-		
+		LayoutManager.layout_manager.add_rename_listener(self, 1)
+		ImageManager.add_image_update_listener( self, 1 )
+
+	def on_rename(self, old_name, new_name):
+		for device in self.srv.devices:
+			if device.get_layout_id() == old_name:
+				device.rename_layout(new_name)
+
+	def on_image_update(self, old_name, new_name):
+		print("Controller.on_image_update")
+		LayoutManager.layout_manager.update_images(old_name, new_name)
 
 	def action( label="Action", parameters = [] ):
 		def decorator(function):

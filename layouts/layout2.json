@@ -2,20 +2,31 @@
 	"1": {
 		"name": "Alt-Tab",
 		"action": "executeMacro",
-		"parameters": ["switch"]
+		"image": null,
+		"parameters": [
+			"switch"
+		]
 	},
 	"2": {
 		"name": "Layout1",
 		"action": "loadLayout",
-		"parameters": ["layout"]
+		"image": null,
+		"parameters": [
+			"layout3"
+		]
 	},
 	"3": {
-		"name": "Button2"
+		"name": "Button2",
+		"image": null,
+		"action": "none_action"
 	},
 	"4": {
 		"name": "Button3",
 		"action": "test",
-		"parameters": [true]
+		"image": null,
+		"parameters": [
+			"Item2"
+		]
 	},
 	"5": {
 		"name": "Button2"

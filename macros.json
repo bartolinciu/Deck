@@ -148,27 +148,15 @@
 	"New macro (1)": [
 		{
 			"delay": 0,
-			"device": "keyboard",
+			"device": "mouse",
 			"action": "press",
-			"key": "4"
+			"button": "right"
 		},
 		{
 			"delay": 0,
-			"device": "keyboard",
-			"action": "press",
-			"key": "3"
-		},
-		{
-			"delay": 0,
-			"device": "keyboard",
-			"action": "press",
-			"key": "2"
-		},
-		{
-			"delay": 0,
-			"device": "keyboard",
-			"action": "press",
-			"key": "1"
+			"device": "mouse",
+			"action": "release",
+			"button": "right"
 		}
 	]
 }

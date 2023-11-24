@@ -3,6 +3,8 @@ import asyncio
 import json
 from Deck import DeviceManager
 from Deck import AuthorizationManager
+from Deck.ImageManager import manager as ImageManager
+
 
 class DeckDevice:
 	def __init__(self, websocket, server):
@@ -14,13 +16,33 @@ class DeckDevice:
 		self.handler = None
 		self.defunct = False
 		self.ready = False
+		#ImageManager.add_image_update_listener( self, 1 )
+
 
 	def set_layout(self, layout_name, layout):
 		self.loop.create_task(self.set_layout_async(layout_name, layout)  )
 
 	async def set_layout_async(self, layout_name, layout):
 		self.config.set_layout(layout_name)
-		await self._send_message( json.dumps( [ layout[button]["name"] for button in layout ] ) )
+
+		def get_image(button):
+			print(button)
+			if "image" in button:
+				definition = ImageManager.get_image_definition( button["image"] )
+				if definition:
+					return definition["hostingPath"]
+			return None
+
+		print([ 
+						{"name": layout[button]["name"], "image": get_image(layout[button]) } for button in layout 
+					] )
+
+		await self._send_message( json.dumps( 
+					[ 
+						{"name": layout[button]["name"], "image": get_image(layout[button]) } for button in layout 
+					] 
+				) 
+			)
 
 	def disconnect(self, reconnect = False):
 		self.loop.create_task( self.disconnect_async(reconnect) ) 
@@ -39,6 +61,9 @@ class DeckDevice:
 	def addOnMessageListener( self, listener, priority ):
 		self.onMessageListeners.append( (priority, listener) )
 		self.onMessageListeners.sort( key = lambda x: x[0])
+
+	def rename_layout(self, new_name):
+		self.config.set_layout(new_name)
 
 	def get_layout_id(self):
 		return self.config.get_layout()

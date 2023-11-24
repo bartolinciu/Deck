@@ -2,37 +2,58 @@
 	"1": {
 		"name": "Alt-Tab",
 		"action": "executeMacro",
-		"parameters": ["switch"]
+		"image": null,
+		"parameters": [
+			"switch"
+		]
 	},
 	"2": {
 		"name": "Layout2",
 		"action": "loadLayout",
-		"parameters": ["layout2"]
+		"image": null,
+		"parameters": [
+			"layout2"
+		]
 	},
 	"3": {
 		"name": "play",
 		"action": "executeMacro",
-		"parameters": ["play"]
+		"image": null,
+		"parameters": [
+			"play"
+		]
 	},
 	"4": {
 		"name": "Macro test",
 		"action": "executeMacro",
-		"parameters": ["Mouse movement"]
+		"image": null,
+		"parameters": [
+			"test2"
+		]
 	},
 	"5": {
 		"name": "macro test",
 		"action": "executeMacro",
-		"parameters": ["test2"]
+		"image": null,
+		"parameters": [
+			"New macro"
+		]
 	},
 	"6": {
 		"name": "select",
 		"action": "executeMacro",
-		"parameters": ["New macro"]
+		"image": "Zmienione",
+		"parameters": [
+			"New macro(1)"
+		]
 	},
 	"7": {
 		"name": "New test",
 		"action": "executeMacro",
-		"parameters": ["New macro (1)"]
+		"image": "Zmienione",
+		"parameters": [
+			"test"
+		]
 	},
 	"8": {
 		"name": ""
@@ -47,7 +68,14 @@
 		"name": ""
 	},
 	"12": {
-		"name": ""
+		"name": "asdf",
+		"image": "Test7",
+		"parameters": [
+			"Item1",
+			true,
+			"ssd"
+		],
+		"action": "test"
 	},
 	"13": {
 		"name": ""

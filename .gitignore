@@ -2,3 +2,4 @@ devices/*
 Deck/__pycache__/*
 Deck/Gui/__pycache__/*
 Deck/actions/__pycache__/*
+ifaddr/__pycache__/*

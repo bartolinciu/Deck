@@ -502,10 +502,11 @@ class MacrosPage(QWidget):
 
 		self.current_step = -1
 
+
 	def macro_name_changed( self, name ):
 		manager.set_macro(self.macro_name, None)
 		manager.set_macro(name, self.macro)
-		layout_manager.update_parameters( name, lambda layout_name, layout, button: button["action"] == "executeMacro" and button["parameter"]== self.macro_name )
+		layout_manager.update_parameters( name, lambda layout_name, layout, button, label: button["action"] == "executeMacro" and button["parameters"][0] == self.macro_name )
 		self.macro_name = name
 
 	def move_step_up(self):

@@ -60,10 +60,17 @@ function onmessage(message){
 		return;
 	}
 	//alert(message.data);
-	let labels = JSON.parse(message.data);
+	let buttons = JSON.parse(message.data);
 	for( let i=1; i <= 16; i++ ){
-		document.getElementById("Button"+i).innerHTML = labels[i-1];
-		//document.getElementById("Button"+i).innerHTML += "<img src = \"img.png\">";
+		let button = buttons[i-1];
+		document.getElementById("Button" + i).innerHTML = ""
+		if( button.image )
+		{
+			document.getElementById("Button"+i).innerHTML += "<img style=\"object-fit:contain;width:100%;height:80%;\" src = \"" + button.image + "\"><br>";
+		}
+		document.getElementById("Button"+i).innerHTML += button.name;
+		console.log(button)
+		
 	}
 }
 

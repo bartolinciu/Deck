@@ -112,10 +112,12 @@ if __name__ == "__main__":
 	option5 = QAction("Settings")
 	option5.triggered.connect(lambda:window.show(3))
 	menu.addAction( option1 )
+	menu.addSeparator()
 	menu.addAction( option2 )
 	menu.addAction( option3 )
 	menu.addAction( option4 )
 	menu.addAction( option5 )
+	menu.addSeparator()
 
 	quit = QAction("Exit Deck")
 	quit.triggered.connect(app.quit)
