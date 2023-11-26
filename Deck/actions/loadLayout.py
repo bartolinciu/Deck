@@ -12,5 +12,7 @@ LayoutManager.add_rename_listener( RenameListener, 2 )
 @DeckController.action(label = "Load layout", parameters = [ {"label": "Layout", "type":"List", "values": LayoutManager.get_layout_list()} ]  )
 async def loadLayout( device, layout_name ):
 	layout = LayoutManager.get_layout(layout_name)
+	if not layout:
+		layout = LayoutManager.empty_layout
 	await device.set_layout_async(layout_name, layout)
 	print("loading layout:", layout_name)

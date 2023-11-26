@@ -448,12 +448,20 @@ class LayoutWidget(QWidget):
 		horizontal = QHBoxLayout()
 		buttons = QGridLayout()
 		
+		self.right_side_stack = QStackedLayout()
+
+		placeholder_widget = QLabel("Select button to edit its properties")
+
+		self.right_side_stack.addWidget(placeholder_widget)
+
 		self.button_parameters = ButtonPropertiesPanel()
 		self.button_parameters.parameters_changed.connect( self.parameters_changed )
 		self.button_parameters.appearance_changed.connect( self.button_appearance_changed )
 
+		right_side_stack.addWidget(self.button_parameters)
+
 		horizontal.addLayout(buttons)
-		horizontal.addWidget(self.button_parameters)
+		horizontal.addLayout(self.right_side_stack)
 
 		self.buttons = []
 
@@ -495,6 +503,7 @@ class LayoutWidget(QWidget):
 			layout_manager.update_layout(self.layout_name, self.layout, visual_change = True)
 
 	def button_selected( self, i ):
+		self.right_side_stack.setCurrentIndex(1)
 		if self.current_button >= 0:
 			self.buttons[self.current_button].setChecked(False)
 		self.current_button = i
@@ -506,6 +515,7 @@ class LayoutWidget(QWidget):
 			button.setFixedSize( QSize(event.size().width() //10, int(event.size().height() * 0.18) ))
 
 	def set_layout( self, layout_name ):
+		self.right_side_stack.setCurrentIndex(0)
 		if self.current_button >= 0:
 			self.buttons[self.current_button].setChecked(False)
 		self.current_button = -1
@@ -589,7 +599,6 @@ class LayoutsPage(QWidget):
 		self.menu.addAction(self.option6)
 
 		layout_menu_button.setMenu(self.menu)
-		#layout_menu_button.setArrowType( Qt.DownArrow )
 		layout_menu_button.setText("\u2022\u2022\u2022")
 		layout_menu_button.setPopupMode( QToolButton.InstantPopup )
 
@@ -624,13 +633,22 @@ class LayoutsPage(QWidget):
 		self.layoutWidget.set_layout(layout)
 
 	def new_layout(self):
-		pass
+		name = layout_manager.new_layout()
+		self.layoutSelector.addItem(name)
+		self.layoutSelector.setCurrentIndex( self.layoutSelector.count()-1 )
 
 	def import_layout(self):
 		text_filter = "Layout files (*.json)"
-		file = QFileDialog.getOpenFileName( parent = self, caption = "Select image", filter = text_filter )
+		file = QFileDialog.getOpenFileName( parent = self, caption = "Select layout", filter = text_filter )
 		if not layout_manager.import_layout( file[0] ):
-			print("Couldn't import layout")
+			msg = QMessageBox()
+			msg.setIcon(QMessageBox.Warning)
+
+			msg.setText("Couldn't import layout")
+			msg.setWindowTitle("Warning")
+			msg.setStandardButtons(QMessageBox.Ok)
+
+			retval = msg.exec_()
 		else:
 			self.list_layouts()
 			self.layoutSelector.setCurrentIndex(self.layoutSelector.count()-1)
@@ -649,15 +667,30 @@ class LayoutsPage(QWidget):
 			layout_manager.rename_layout( self.stashed_layout, self.layoutSelector.currentText() )
 			self.layoutWidget.refresh()
 
-
-
-
 	def duplicate_layout(self):
-		pass
+		new_layout = layout_manager.duplicate_layout( self.layoutSelector.currentText() )
+		if new_layout:
+			self.layoutSelector.insertItem( self.layoutSelector.currentIndex()+1, new_layout )
+			self.layoutSelector.setCurrentIndex( self.layoutSelector.currentIndex()+1 )
+		else:
+			msg = QMessageBox()
+			msg.setIcon(QMessageBox.Warning)
+
+			msg.setText("Couldn't duplicate layout")
+			msg.setWindowTitle("Warning")
+			msg.setStandardButtons(QMessageBox.Ok)
+
+			retval = msg.exec_()
 
 	def export_layout(self):
-		pass
+		text_filter = "Layout files (*.json)"
+
+		file = QFileDialog.getSaveFileName( parent = self, caption = "Save layout", filter = text_filter )[0]
+
+		layout_manager.export_layout(self.layoutSelector.currentText(), file)
 
 	def delete_layout(self):
-		pass
+		layout_manager.update_layout( self.layoutSelector.currentText(), None )
+		self.list_layouts()
+		self.select_layout()
 
