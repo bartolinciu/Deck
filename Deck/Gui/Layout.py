@@ -567,8 +567,8 @@ class LayoutsPage(QWidget):
 		layout_menu_button = ToolButton()
 		self.option1 = QAction("New")
 		self.option1.triggered.connect(self.new_layout)
-		#self.option2 = QAction("Import")
-		#self.option2.triggered.connect( self.import_layout )
+		self.option2 = QAction("Import")
+		self.option2.triggered.connect( self.import_layout )
 		self.option3 = QAction("Rename")
 		self.option3.triggered.connect(self.rename_layout)
 		self.option4 = QAction("Duplicate")
@@ -580,7 +580,7 @@ class LayoutsPage(QWidget):
 
 		self.menu = QMenu()
 		self.menu.addAction( self.option1 )
-		#self.menu.addAction(self.option2)
+		self.menu.addAction(self.option2)
 		self.menu.addSeparator()
 		self.menu.addAction(self.option3)
 		self.menu.addAction(self.option4)
@@ -596,8 +596,7 @@ class LayoutsPage(QWidget):
 		top_layout.addWidget( self.layoutSelector )
 		top_layout.addWidget(layout_menu_button)
 
-		for layout in layout_manager.get_layout_list():
-			self.layoutSelector.addItem( layout )
+		self.list_layouts()
 
 		self.layoutSelector.setInsertPolicy(QComboBox.InsertAtCurrent)		
 
@@ -613,6 +612,12 @@ class LayoutsPage(QWidget):
 
 		self.setLayout(vertical)
 
+	def list_layouts(self):
+		self.layoutSelector.blockSignals(True)
+		self.layoutSelector.clear()
+		for layout in layout_manager.get_layout_list():
+			self.layoutSelector.addItem( layout )
+		self.layoutSelector.blockSignals(False)
 
 	def select_layout(self):
 		layout = self.layoutSelector.currentText()
@@ -622,7 +627,14 @@ class LayoutsPage(QWidget):
 		pass
 
 	def import_layout(self):
-		pass
+		text_filter = "Layout files (*.json)"
+		file = QFileDialog.getOpenFileName( parent = self, caption = "Select image", filter = text_filter )
+		if not layout_manager.import_layout( file[0] ):
+			print("Couldn't import layout")
+		else:
+			self.list_layouts()
+			self.layoutSelector.setCurrentIndex(self.layoutSelector.count()-1)
+
 
 	def rename_layout(self):
 		self.stashed_layout = self.layoutSelector.currentText()

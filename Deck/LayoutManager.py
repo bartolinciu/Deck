@@ -1,7 +1,7 @@
 import os
 import json
 	
-
+import shutil
 
 class LayoutManager:
 	suffix = ".json"
@@ -72,6 +72,27 @@ class LayoutManager:
 					
 					if changed:
 						self.update_layout( layout_name, layout, skip_cache = True )
+
+	def import_layout(self, layout_path):
+		if not os.path.isfile(layout_path):
+			print("Couldn't find file")
+			return False
+
+		file, ext = os.path.splitext(layout_path)
+		if not ext == self.suffix:
+			print("incorrect extension")
+			return False
+
+		name = os.path.basename(file)
+
+		if name in self.layouts:
+			print("layout already exists")
+			return False
+
+		self.layouts.append(name)
+		shutil.copyfile( layout_path, os.path.join( self.prefix, os.path.basename(layout_path) ) )
+		return True
+
 
 	def rename_layout( self, old_name, new_name ):
 		if not old_name in self.layouts:
