@@ -2,7 +2,7 @@ websockets
 PyQt5
 qrcode
 pynput
-
+psutil
 
 https://www.pythonguis.com/tutorials/pyqt-signals-slots-events/
 https://doc.qt.io/qtforpython-6/overviews/signalsandslots.html#a-real-example

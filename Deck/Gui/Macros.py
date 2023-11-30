@@ -491,7 +491,17 @@ class MacrosPage(QWidget):
 		grid.addWidget(self.macroSelector, 1, 0)
 		grid.addWidget(self.stepSelector, 1, 1)
 		layout.addLayout(grid)
+
+		placeholder_widget = QFrame()
+		box_layout = QBoxLayout(QBoxLayout.LeftToRight)
+		label = QLabel("Select layout to edit its properties")
+		label.setAlignment( Qt.AlignCenter )
+		box_layout.addWidget(label, Qt.AlignCenter)
+		placeholder_widget.setFrameShape( QFrame.StyledPanel )
+		placeholder_widget.setLayout(box_layout)
+
 		self.stack = QStackedLayout()
+		self.stack.addWidget( placeholder_widget )
 		self.stack.addWidget( self.macro_properties )
 		self.stack.addWidget(self.properties)
 		layout.addLayout( self.stack )
@@ -555,7 +565,7 @@ class MacrosPage(QWidget):
 	def macro_selected(self, i, macro_name):
 		self.macro_name = macro_name
 		self.macro = manager.get_macro( macro_name )
-		self.stack.setCurrentIndex(0)
+		self.stack.setCurrentIndex(1)
 		self.macro_properties.set_name(macro_name)
 		self.macro_properties.set_duration( sum([step["delay"] for step in self.macro]) )
 		self.stepSelector.clear()
@@ -569,7 +579,7 @@ class MacrosPage(QWidget):
 			self.stepSelector.add_button( text, step )
 
 	def step_selected(self, i, step ):
-		self.stack.setCurrentIndex(1)
+		self.stack.setCurrentIndex(2)
 		self.current_step = i
 		self.properties.set_step(step)
 

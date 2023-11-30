@@ -450,7 +450,13 @@ class LayoutWidget(QWidget):
 		
 		self.right_side_stack = QStackedLayout()
 
-		placeholder_widget = QLabel("Select button to edit its properties")
+		placeholder_widget = QFrame()
+		box_layout = QBoxLayout(QBoxLayout.LeftToRight)
+		label = QLabel("Select button to edit its properties")
+		label.setAlignment( Qt.AlignCenter )
+		box_layout.addWidget(label, Qt.AlignCenter)
+		placeholder_widget.setFrameShape( QFrame.StyledPanel )
+		placeholder_widget.setLayout(box_layout)
 
 		self.right_side_stack.addWidget(placeholder_widget)
 
@@ -458,7 +464,7 @@ class LayoutWidget(QWidget):
 		self.button_parameters.parameters_changed.connect( self.parameters_changed )
 		self.button_parameters.appearance_changed.connect( self.button_appearance_changed )
 
-		right_side_stack.addWidget(self.button_parameters)
+		self.right_side_stack.addWidget(self.button_parameters)
 
 		horizontal.addLayout(buttons)
 		horizontal.addLayout(self.right_side_stack)
