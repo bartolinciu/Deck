@@ -4,6 +4,7 @@ from collections import namedtuple
 from Deck import LayoutManager
 from Deck import DeviceManager
 from Deck.ImageManager import manager as ImageManager
+from Deck.BindingManager import manager as BindingManager
 import threading
 
 import ifaddr
@@ -11,9 +12,14 @@ import re
 import time
 import os
 import json
+import sys
+
 
 DeckAction = namedtuple( "DeckAction", "name label parameters function" )
 
+if sys.platform=="win32":
+	import win32process
+	import psutil
 
 class DeckController:
 	actions = {  }
@@ -32,6 +38,91 @@ class DeckController:
 		LayoutManager.layout_manager.add_layout_update_listener( self, 1 )
 		LayoutManager.layout_manager.add_rename_listener(self, 1)
 		ImageManager.add_image_update_listener( self, 1 )
+		
+		self.window = None
+		self.app = None
+		self.title = None
+
+		self.window_watchdog = threading.Thread( target = self.monitor_active_window, daemon = True )
+
+		self.debug_time = None
+
+	def monitor_active_window(self):
+		import pywinctl
+		import pywintypes
+		while self.running:
+			try:
+				window = pywinctl.getActiveWindow()
+				self.debug_time = time.time()
+				if window == None:
+					continue
+
+				window_changed = ( window != self.window )
+				app = ""
+				try:
+					if sys.platform == "win32":
+						pid = win32process.GetWindowThreadProcessId( window.getHandle() )[1]
+						app = psutil.Process(pid).exe().split("\\")[-1]
+					else:
+						app = window.getAppName()
+				except pywintypes.com_error:
+					pass
+				title = window.title
+
+				
+				app_changed = (app != self.app )
+				title_changed = (title != self.title)
+				self.window = window
+				self.app = app
+				self.title = title
+
+				if window_changed or app_changed or title_changed:
+					self.active_window_changed()
+			except pywintypes.error:
+				pass
+
+			time.sleep(0.05)
+		print("stopping window watchdog")
+
+	def active_window_changed(self):
+		bindings = BindingManager.get_bindings_by_window( self.app, self.title )
+		title_specific_bindings = []
+		title_universal_bindings = []
+		universal_bindings = []
+		
+		for binding in bindings:
+			if binding["title"] == "*" and binding["device"] == "*":
+				universal_bindings.append(binding)
+			if binding["title"] != "*":
+				title_specific_bindings.append(binding)
+			else:
+				title_universal_bindings.append(binding)
+
+
+		def get_binding_by_device(device):
+			for binding_list in [ title_specific_bindings, title_universal_bindings ]:
+				for binding in binding_list:
+					if binding["device"] == device.get_uuid():
+						return binding
+			for binding in title_specific_bindings:
+				if binding["device"] == "*":
+					return binding
+
+			if len(universal_bindings) > 0:
+				return universal_bindings[0]
+			return None
+
+		
+		for device in self.srv.devices:
+			device_time = time.time()
+			binding = get_binding_by_device( device )
+			if binding == None:
+				continue
+			layout_name = binding["layout"]
+			if layout_name != device.get_layout_id():
+				layout = LayoutManager.layout_manager.get_layout(layout_name)
+				device.set_layout( layout_name, layout )
+
 
 	def on_rename(self, old_name, new_name):
 		for device in self.srv.devices:
@@ -146,7 +237,9 @@ class DeckController:
 		return False
 
 	def run(self):
+		print("Starting controller")
 		self.running = True
+		self.window_watchdog.start()
 		while self.running:
 			while not self.ready:
 				time.sleep(0.01)
@@ -155,8 +248,10 @@ class DeckController:
 		
 
 	def stop(self):
+		print("Stopping controller")
 		self.running = False
 		self.srv.stop()
+		
 
 @DeckController.action( label = "None", parameters=[] )
 def none_action(device):
