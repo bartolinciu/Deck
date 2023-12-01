@@ -32,7 +32,6 @@ class LayoutManager:
 		self.rename_listeners = []
 
 	def update_images( self, old_image, new_image ):
-		print(old_image, new_image)
 		for layout_name in self.layouts:
 			if layout_name in self.loaded_layouts:
 				if layout_name in self.loaded_layouts:

@@ -26,16 +26,11 @@ class DeckDevice:
 		self.config.set_layout(layout_name)
 
 		def get_image(button):
-			print(button)
 			if "image" in button:
 				definition = ImageManager.get_image_definition( button["image"] )
 				if definition:
 					return definition["hostingPath"]
 			return None
-
-		print([ 
-						{"name": layout[button]["name"], "image": get_image(layout[button]) } for button in layout 
-					] )
 
 		await self._send_message( json.dumps( 
 					[ 
