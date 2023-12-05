@@ -20,6 +20,8 @@ from Deck.Gui.Layout import LayoutsPage
 from Deck.Gui.Device import DevicesPage
 from Deck.Gui.Macros import MacrosPage
 from Deck.Gui.Settings import SettingsPage
+from Deck.Gui.Bindings import BindingsPage
+
 
 import queue
 #import win32gui, win32process, psutil
@@ -37,7 +39,8 @@ class MainWindow(QMainWindow):
 		self.tabSelector.insertTab( 0, "Devices" )
 		self.tabSelector.insertTab( 1, "Layouts" )
 		self.tabSelector.insertTab( 2, "Macros" )
-		self.tabSelector.insertTab( 3, "Settings")
+		self.tabSelector.insertTab( 3, "Bindings")
+		self.tabSelector.insertTab( 4, "Settings")
 
 
 		self.devicesWidget = DevicesPage()
@@ -47,12 +50,14 @@ class MainWindow(QMainWindow):
 		macrosWidget = MacrosPage()
 		self.settingsWidget = SettingsPage( controller.get_network_configuration() )
 		tabLayout = QStackedLayout()
+		bindingsWidget = BindingsPage()
 
 		self.settingsWidget.network_settings_changed.connect(self.network_settings_changed)
 
 		tabLayout.addWidget( self.devicesWidget )
 		tabLayout.addWidget( layoutsWidget )
 		tabLayout.addWidget( macrosWidget )
+		tabLayout.addWidget( bindingsWidget )
 		tabLayout.addWidget( self.settingsWidget )
 
 		
@@ -109,14 +114,17 @@ if __name__ == "__main__":
 	option3.triggered.connect( lambda: window.show(1) )
 	option4 = QAction("Macros")
 	option4.triggered.connect(lambda:window.show(2))
-	option5 = QAction("Settings")
+	option5 = QAction("Bindings")
 	option5.triggered.connect(lambda:window.show(3))
+	option6 = QAction("Settings")
+	option6.triggered.connect(lambda:window.show(4))
 	menu.addAction( option1 )
 	menu.addSeparator()
 	menu.addAction( option2 )
 	menu.addAction( option3 )
 	menu.addAction( option4 )
 	menu.addAction( option5 )
+	menu.addAction( option6 )
 	menu.addSeparator()
 
 	quit = QAction("Exit Deck")

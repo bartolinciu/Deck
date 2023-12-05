@@ -16,7 +16,7 @@ class BindingManager:
 
 	def save(self):
 		with open(self.binding_file_path, "wt") as f:
-			f.write( json.dumps( self.bindings ), indent = "\t" )
+			f.write( json.dumps( self.bindings , indent = "\t" ))
 
 	def get_bindings( self ):
 		return self.bindings
@@ -25,16 +25,25 @@ class BindingManager:
 		app_bindings = [ binding for binding in self.bindings if binding["app"] == app ]
 		return [ binding for binding in app_bindings if binding["title"] == "*" or re.matcher(binding["title"]).match(title) ]
 
+	def update_binding(self, i, binding):
+		self.bindings[i] = binding
+		self.save()
 
 	def add_binding( self, binding ):
 		self.bindings.append(binding)
+		self.save()
 
 	def pop_binding( self, i ):
 		binding  = self.bindings[i]
 		self.bindings = self.bindings[:i] + self.bindings[i+1:]
+		self.save()
 		return binding
 
 	def move_binding(self, old_index, new_index):
-		self.bindings.insert(new_index, self.pop_binding(old_index))
+		if old_index < 0 or old_index >= len(self.bindings) or new_index < 0 or new_index >= len(self.bindings):
+			return
+		binding = self.pop_binding(old_index)
+		self.bindings.insert(new_index, binding)
+		self.save()
 
 manager = BindingManager()

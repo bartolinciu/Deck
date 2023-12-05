@@ -68,6 +68,8 @@ class DeviceManager:
 					print(e)
 					continue
 		
+	def get_device_configs(self):
+		return self.configs
 
 	def get_config(self, uuid):
 		return self.configs[uuid]
