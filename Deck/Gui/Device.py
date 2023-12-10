@@ -38,7 +38,7 @@ class DevicePropertiesWidget(QFrame):
 
 		layout.addWidget( QLabel("Merge with"), 2,0  )
 		self.target_device_selector = QComboBox()
-
+		self.is_connected = True
 
 		layout.addWidget(self.target_device_selector, 2, 1)
 
@@ -54,11 +54,19 @@ class DevicePropertiesWidget(QFrame):
 				self.target_device_selector.addItem( config.get_name(), config.get_uuid() )
 
 
-	def set_properties(self, properties):
+	def set_properties(self, properties, is_connected):
 		self.properties = properties
 		self.layout_selector.setCurrentIndex( self.layout_selector.findText(properties.get_layout()) )
 		self.name.setText( properties.get_name() )
 		self.list_mergable_devices()
+		
+		if self.is_connected != is_connected:
+			self.layout().itemAtPosition( 2, 0 ).widget().setVisible(is_connected)
+			self.target_device_selector.setVisible(is_connected)
+			self.merge_button.setVisible(is_connected)
+			self.disconnect_button.setVisible(is_connected)
+			self.is_connected = is_connected
+
 
 	def layout_changed(self, index):
 		if self.set_by_code:
@@ -155,9 +163,39 @@ class DevicesPage(QWidget):
 		self.properties_panel.forget.connect(self.forget_device)
 		self.properties_panel.merge.connect(self.merge_device)
 
-		self.layout().addWidget(self.device_list_widget)
+		self.disconnected_device_list = ScrollableButtonSelector()
+		self.disconnected_device_list.button_selected.connect(self.disconnected_device_selected)
+
+		left_layout = QVBoxLayout()
+		left_layout.addWidget(self.device_list_widget)
+
+		self.visibility_checkbox = QCheckBox("Show disconnected devices")
+		self.visibility_checkbox.stateChanged.connect( self.disconnected_device_list.setVisible )
+		left_layout.addWidget(self.visibility_checkbox)
+
+		left_layout.addWidget(self.disconnected_device_list)
+		self.disconnected_device_list.setVisible(False)
+		# visibility_controll_layout = QHBoxLayout()
+		# visibility_controll_layout.addWidget("Show")
+
+		self.layout().addLayout(left_layout)
 		self.layout().addWidget(self.properties_panel)
 		self.current_device = -1
+		self.current_disconnected_device = -1
+
+		self.controller = None
+		self.devices = []
+		self.disconnected_devices = []
+
+		self.list_devices()
+
+
+	def disconnected_device_selected(self, i):
+		self.device_list_widget.select_button(-1)
+		self.current_device = -1
+		self.current_disconnected_device = i
+		self.properties_panel.set_properties(self.disconnected_devices[self.current_disconnected_device], is_connected=False)
+
 
 
 	def merge_device(self, target_uuid):
@@ -166,7 +204,7 @@ class DevicesPage(QWidget):
 			msg.setIcon(QMessageBox.Information)
 			name = DeviceManager.get_config(target_uuid).get_name()
 			msg.setText("Are you sure you want to merge this device with " + name + "?")
-			msg.setInformativeText("This device will be identified as " + name + ".\nAll bindings connected to this device will be reassigned to new device\nThis operation is irreversible")
+			msg.setInformativeText("This device will be identified as " + name + ".\nAll bindings connected to this device will be reassigned to new device\nThis operation is irreversible.\nNote: If any of the devices using this identifier is currently disconnected, it will have to be authorized again and merged with " + name)
 			msg.setWindowTitle("Merge?")
 			msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
 
@@ -185,33 +223,43 @@ class DevicesPage(QWidget):
 			self.devices[self.current_device].set_name(properties.get_name())
 			self.devices[self.current_device].set_layout( properties.get_layout(), LayoutManager.get_layout(properties.get_layout()) )
 			self.device_list_widget.set_button_text( self.current_device, properties.get_name() )
+		elif self.current_disconnected_device != -1:
+			self.disconnected_device_list.set_button_text(self.current_disconnected_device, properties.get_name())
+			properties.save()
 
 	def disconnect_device(self):
 		if self.current_device != -1:
 			self.devices[self.current_device].disconnect()
 
 	def forget_device(self):
+
+		msg = QMessageBox()
+		msg.setIcon(QMessageBox.Information)
+
+		msg.setText("Are you sure you want to forget this device?")
+		msg.setInformativeText("This operation is irreversible")
+		msg.setWindowTitle("Forget?")
+		msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+		retval = msg.exec_()
+
+		if not retval == QMessageBox.Ok:
+			return
+
 		if self.current_device != -1:
-			msg = QMessageBox()
-			msg.setIcon(QMessageBox.Information)
-
-			msg.setText("Are you sure you want to forget this device?")
-			msg.setInformativeText("This operation is irreversible")
-			msg.setWindowTitle("Forget?")
-			msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-
-			retval = msg.exec_()
-
-			if not retval == QMessageBox.Ok:
-				return
-
-			
 			self.devices[self.current_device].forget()
 			self.devices[self.current_device].disconnect()
 
+		elif self.current_disconnected_device != -1:
+			DeviceManager.delete_device( self.disconnected_devices[self.current_disconnected_device] )
+			
+			self.list_devices()
+
 	def device_selected(self, i):
+		self.disconnected_device_list.select_button(-1)
+		self.current_disconnected_device = -1
 		self.current_device = i
-		self.properties_panel.set_properties( self.devices[i].get_configuration() )
+		self.properties_panel.set_properties( self.devices[i].get_configuration(), is_connected = True )
 
 	def event(self, event):
 		if event.type() == QEvent.User + 1:
@@ -222,14 +270,27 @@ class DevicesPage(QWidget):
 		return QWidget.event(self,event)
 
 	def list_devices(self):
-		if self.controller:
-			current_device = None
-			if self.current_device != -1:
-				current_device = self.devices[self.current_device]
+		current_device = None
+		current_disconnected_device = None
+		if self.current_device != -1:
+			current_device = self.devices[self.current_device]
+		elif self.current_disconnected_device != -1:
+			current_disconnected_device = self.disconnected_devices[self.current_disconnected_device]
+
+		connected_uuids = []
+		self.disconnected_devices = []
+
+		if self.controller != None:
+			
 			self.devices = self.controller.srv.devices[:]
 			self.devices.sort( key = lambda x: x.get_name() )
+			
 
 			for i, device in enumerate(self.devices):
+				connected_uuids.append(device.get_uuid())
+				if current_disconnected_device != None and current_disconnected_device.get_uuid() == device.get_uuid():
+					current_device = device
+					current_disconnected_device = None  
 				if i < self.device_list_widget.button_count:
 					self.device_list_widget.set_button_text(i, device.get_name())
 				else:
@@ -238,12 +299,41 @@ class DevicesPage(QWidget):
 			for i in range( len(self.devices), self.device_list_widget.button_count):
 				self.device_list_widget.remove_item(i)
 
-			if current_device in self.devices:
-				self.current_device = self.devices.index(current_device)
-			else:
-				self.current_device = -1
 
-			self.device_list_widget.select_button(self.current_device)
+		number_of_disconnected_devices = 0
+		for uuid,config in DeviceManager.get_device_configs().items():
+
+			if uuid in connected_uuids or uuid == "0000000000000000":
+				continue
+			self.disconnected_devices.append(config)
+			if number_of_disconnected_devices < self.disconnected_device_list.button_count:
+				self.disconnected_device_list.set_button_text(number_of_disconnected_devices, config.get_name() )
+			else:
+				self.disconnected_device_list.add_button(config.get_name())
+			if current_device != None and current_device.get_uuid() == uuid:
+				current_disconnected_device = config
+				current_device = None
+			number_of_disconnected_devices += 1
+
+		for i in range( len(self.disconnected_devices), self.disconnected_device_list.button_count ):
+			self.disconnected_device_list.remove_item(i)
+
+		if current_device in self.devices:
+			self.current_device = self.devices.index(current_device)
+			self.properties_panel.set_properties( self.devices[self.current_device].get_configuration(), is_connected = True )
+		else:
+			self.current_device = -1
+
+		if current_disconnected_device in self.disconnected_devices:
+			self.current_disconnected_device = self.disconnected_devices.index(current_disconnected_device)
+			self.properties_panel.set_properties(self.disconnected_devices[self.current_disconnected_device], is_connected=False)
+		else:
+			self.current_disconnected_device = -1
+
+
+
+		self.device_list_widget.select_button(self.current_device)
+		self.disconnected_device_list.select_button(self.current_disconnected_device)
 			
 
 	def refresh(self):
