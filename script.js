@@ -54,7 +54,7 @@ function onmessage(message){
 
 	splitted_message = message.data.split(":")
 
-	if( splitted_message[0] == "accept" )
+	if( splitted_message[0] == "accept" || splitted_message[0]=="merge" )
 	{
 		setCookie( "uuid", splitted_message[1], 365 );
 		return;

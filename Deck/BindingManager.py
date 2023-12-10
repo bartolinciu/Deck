@@ -18,6 +18,13 @@ class BindingManager:
 		with open(self.binding_file_path, "wt") as f:
 			f.write( json.dumps( self.bindings , indent = "\t" ))
 
+	def reassign_bindings(self, uuid, target_uuid):
+		for binding in self.bindings:
+			if binding["device"] == uuid:
+				binding["device"] = target_uuid
+
+		self.save()
+
 	def get_bindings( self ):
 		return self.bindings
 

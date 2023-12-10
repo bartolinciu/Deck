@@ -17,13 +17,22 @@ class DeckDevice:
 		self.defunct = False
 		self.ready = False
 		#ImageManager.add_image_update_listener( self, 1 )
-
+		self.layout = None
 
 	def set_layout(self, layout_name, layout):
 		self.loop.create_task(self.set_layout_async(layout_name, layout)  )
 
+	def merge(self, target_uuid):
+		self.send_message("merge:"+target_uuid)
+		self.forget()
+		self.disconnect(reconnect = True)
+
 	async def set_layout_async(self, layout_name, layout):
+		if self.config.get_layout == layout_name and self.layout == layout:
+			return
+			
 		self.config.set_layout(layout_name)
+		self.layout = layout
 
 		def get_image(button):
 			if "image" in button:
@@ -47,6 +56,10 @@ class DeckDevice:
 			if reconnect:
 				await socket.send("reconnect")
 			await socket.close()
+
+	def send_message(self, message):
+		self.loop.create_task( self._send_message(message) ) 
+
 		
 	async def _send_message(self, message):
 		for socket in self.websockets:
@@ -78,6 +91,9 @@ class DeckDevice:
 	def forget(self):
 		self.defunct = True
 		DeviceManager.device_manager.delete_device(self.config)
+
+	def get_configuration(self):
+		return self.config
 
 	async def on_message(self, message, websocket):
 		if self.defunct:
