@@ -2,8 +2,9 @@ import websockets
 import asyncio
 import json
 from Deck import DeviceManager
-from Deck import AuthorizationManager
+from Deck.AuthorizationManager import manager as AuthorizationManager
 from Deck.ImageManager import manager as ImageManager
+import time
 
 
 class DeckDevice:
@@ -18,6 +19,8 @@ class DeckDevice:
 		self.ready = False
 		#ImageManager.add_image_update_listener( self, 1 )
 		self.layout = None
+		self.waiting_for_pascode = False
+		self.passcode = ""
 
 	def set_layout(self, layout_name, layout):
 		self.loop.create_task(self.set_layout_async(layout_name, layout)  )
@@ -95,6 +98,22 @@ class DeckDevice:
 	def get_configuration(self):
 		return self.config
 
+	def request_passcode(self):
+		self.send_message("authorize")
+		self.waiting_for_pascode = True
+		while self.waiting_for_pascode:
+			time.sleep(0.01)
+
+		return self.passcode
+
+	def grant_access(self):
+		self.config = DeviceManager.device_manager.new_device()
+		self.send_message( "accept:" + self.config.get_uuid() )
+		self.ready = True
+
+	def reject_access(self):
+		self.send_message("reject")
+
 	async def on_message(self, message, websocket):
 		if self.defunct:
 			return
@@ -109,17 +128,13 @@ class DeckDevice:
 		if ":" in message_str:
 			command, argument = message_str.split(":")
 
-		if command == "authorize":
-			self.config = DeviceManager.device_manager.new_device()
-			if AuthorizationManager.AuthorizationManager.is_passcode_valid(argument):
-				await self._send_message( "accept:" + self.config.get_uuid() )
-				self.ready = True
-			else:
-				await self._send_message("reject")
+		if command == "request":
+			AuthorizationManager.request_authorization(self)
 			return
 
 
-		if  command == "identify":
+
+		elif  command == "identify":
 			uuid = argument
 			print( "connections list:", self.websockets )
 			try:
@@ -130,6 +145,12 @@ class DeckDevice:
 				await self._send_message("reject")
 			
 			return
+
+		elif command == "passcode":
+			self.passcode = argument
+			self.waiting_for_pascode = False
+			return
+
 
 
 

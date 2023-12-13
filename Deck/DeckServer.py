@@ -69,7 +69,7 @@ class DeckServer:
 
 		async for message in websocket:
 			await device.on_message(message, websocket)
-			if (str(message).startswith("identify") or str(message).startswith("authorize")) and device.ready:
+			if str(message).startswith("identify") and device.ready:
 				existing_device = None
 				duplicate = False
 				for tmpDevice in self.devices:
