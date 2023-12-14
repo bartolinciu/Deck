@@ -9,15 +9,15 @@ class AuthorizationManager:
 	auth_file_path = os.path.join( os.path.dirname(__file__) , auth_file_name )
 	def __init__(self, path = None):
 		if not os.path.isfile(self.auth_file_path):
-			self.config = {"method": "all", "passcode":""}
+			self.config = {"method": "all", "passcode":"", "blacklist": []}
 			self.save()
 		else:
 			with open( self.auth_file_path, "rt" ) as f:
 				self.config = json.loads( f.read() )
 
 		self.delegate = None
-		self.salt1 = random.random()
-		self.salt2 = random.random()
+
+		self.timeout = 30
 
 	def save(self):
 		with open(self.auth_file_path, "wt") as f:
@@ -35,10 +35,14 @@ class AuthorizationManager:
 		return self.config["method"]
 
 	def get_passcode(self):
-		return self.config("passcode")
+		return self.config["passcode"]
 
 	def get_temp_passcode(self):
-		return round((((time.time()//60)*60) ** (self.salt1*10)) % (10000*self.salt2) )
+		code = str(round( ((time.time()//self.timeout)*self.timeout ** 123) % 10000 ))
+		return "0" * (4-len(code)) + code
+
+	def set_delegate(self, delegate):
+		self.delegate = delegate
 
 	def _request_authorization(self, device):
 		authorized = False
@@ -50,10 +54,16 @@ class AuthorizationManager:
 				authorized =  True
 
 			case "pass":
-				authorized = device.request_passcode() == self.config["passcode"]
+				for i in range(3):
+					authorized = device.request_passcode() == self.config["passcode"]
+					if authorized:
+						break
 
 			case "temp":
-				authorized = device.request_passcode() == self.get_temp_passcode()
+				for i in range(3):
+					authorized = device.request_passcode() == self.get_temp_passcode()
+					if authorized:
+						break
 
 			case "delegate":
 				if self.delegate == None:

@@ -5,7 +5,9 @@ from PyQt5.QtWidgets import *
 import ifaddr
 
 import re
+import threading
 
+from Deck.AuthorizationManager import manager as AuthorizationManager
 
 matcher = re.compile( "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}" )
 
@@ -126,8 +128,6 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 
 		self.set_widgets()
 
-
-
 class InterfacesTreeWidget( QTreeWidget ):
 	def __init__( self, *args, **kwargs ):
 		super( InterfacesTreeWidget, self ).__init__( *args, **kwargs )
@@ -161,6 +161,127 @@ class InterfacesTreeWidget( QTreeWidget ):
 		QTreeWidget.addTopLevelItem( self, item )
 		item.set_widgets()
 
+class PasscodeValidator(QValidator):
+	def __init__(self, default, *args, **kwargs):
+		super(PasscodeValidator, self).__init__(*args, **kwargs)
+		self.default = default
+
+	def set_default(self, default):
+		self.default = default
+
+	def fixup(self, value):
+		return self.default
+
+	def validate(self, value, pos):
+		result = QValidator.Intermediate
+		if len(value) == 4 and value.isdigit():
+			result = QValidator.Acceptable
+		return (result, value, pos)
+
+
+
+class AuthorizationPanel( QFrame ):
+	def __init__(self, *args, **kwargs):
+		super( AuthorizationPanel, self ).__init__(*args, **kwargs)
+		self.setFrameShape(QFrame.StyledPanel)
+		self.setLayout(QHBoxLayout())
+		self.method_selector = QComboBox()
+		self.method_selector.addItem("Block all devices", "none")
+		self.method_selector.addItem("Allow all devices", "all")
+		self.method_selector.addItem("Temporary access code", "temp")
+		self.method_selector.addItem("Passcode", "pass")
+		self.method_selector.addItem("Ask for permission", "delegate")
+		self.layout().addWidget(self.method_selector)
+		parameters_layout = QStackedLayout()		
+
+		parameters_layout.addWidget( QWidget() ) #no parameters when blocking all devices
+		parameters_layout.addWidget( QWidget() ) #no parameters when accepting all devices
+
+		self.passcode_display = QLabel( AuthorizationManager.get_temp_passcode() )
+		self.passcode_display.setStyleSheet("QLabel{ background-color:black; font-size:30px; } QLabel:hover{background-color:transparent;}")
+		self.passcode_display.setMaximumWidth( self.width()//2 )
+		widget = QWidget()
+		widget.setLayout(QHBoxLayout())
+		widget.layout().addWidget( self.passcode_display )
+		parameters_layout.addWidget(widget)
+
+		widget = QWidget()
+		widget.setLayout(QHBoxLayout())
+		self.passcode_validator = PasscodeValidator(AuthorizationManager.get_passcode())
+
+		self.passcode_edit = QLineEdit(AuthorizationManager.get_passcode())
+		self.passcode_edit.setValidator(self.passcode_validator)
+		self.passcode_edit.setEchoMode(QLineEdit.Password)
+		self.passcode_edit.editingFinished.connect( self.passcode_changed )
+		self.passcode_visibility_checkbox = QCheckBox("Show characters")
+		self.passcode_visibility_checkbox.stateChanged.connect(lambda state: self.passcode_edit.setEchoMode({Qt.Unchecked:QLineEdit.Password, Qt.Checked:QLineEdit.Normal}[state]))
+		widget.layout().addWidget(self.passcode_edit)
+		widget.layout().addWidget(self.passcode_visibility_checkbox)
+		parameters_layout.addWidget(widget)
+
+		parameters_layout.addWidget(QWidget())
+		self.layout().addLayout(parameters_layout)
+
+		self.method_selector.currentIndexChanged.connect(parameters_layout.setCurrentIndex)
+		self.method_selector.setCurrentIndex( self.method_selector.findData( AuthorizationManager.get_method() ) )
+		self.method_selector.currentIndexChanged.connect(self.method_selected)
+
+		self.timer = QTimer(self);
+		self.timer.timeout.connect(self.set_temp_passcode)
+		self.timer.start(1000);
+
+		self.cv = threading.Condition()
+
+		self.authorization = False
+
+		AuthorizationManager.set_delegate(self)
+
+
+
+	def passcode_changed(self):
+		AuthorizationManager.set_passcode( self.passcode_edit.text() )
+		self.passcode_validator.set_default(self.passcode_edit.text())
+		self.passcode_edit.clearFocus()
+
+	def method_selected(self, index):
+		AuthorizationManager.set_method( self.method_selector.currentData() )
+
+	def set_temp_passcode(self):
+		self.passcode_display.setText(AuthorizationManager.get_temp_passcode())
+
+	def event( self, event ):
+		if event.type() == QEvent.User + 2:
+			self._request_authorization( event.device )
+				
+			return True
+		return QWidget.event(self,event)
+
+	def request_authorization(self, device):
+		self.authorization = False
+		event = QEvent(QEvent.User + 2)
+		event.device = device
+		QCoreApplication.postEvent(self, event )
+		with self.cv:
+			self.cv.wait()
+
+		return self.authorization
+
+
+	def _request_authorization(self, device):
+		msg = QMessageBox()
+		msg.setIcon(QMessageBox.Question)
+
+		msg.setText("Unknown device is trying to connect from " + device.websockets[0].remote_address[0] + ". Allow?")
+		msg.setWindowTitle("New device")
+		msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+
+		retval = msg.exec_()
+
+		self.authorization = retval == QMessageBox.Yes
+		with self.cv:
+			self.cv.notify()
+
+
 
 class SettingsPage(QWidget):
 	network_settings_changed = pyqtSignal()
@@ -168,6 +289,7 @@ class SettingsPage(QWidget):
 	def __init__(self, config = None, *args, **kwargs):
 		super(SettingsPage, self).__init__(*args, **kwargs)
 		layout = QVBoxLayout()
+		layout.addWidget(AuthorizationPanel())
 		self.tree = InterfacesTreeWidget()
 
 		self.config = config

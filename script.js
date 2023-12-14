@@ -44,12 +44,19 @@ function onmessage(message){
 	}
 
 	if(message.data == "reject"){
-		authorize();
+		alert("Access denied");
 		return;
 	}
 
 	if( message.data == "reconnect" ){
 		reconnect = true;
+		return;
+	}
+
+	else if( message.data == "authorize" ){
+		passcode = prompt("Enter pairing code");
+		ws.send( "passcode:" + passcode );
+		return;
 	}
 
 	splitted_message = message.data.split(":")
@@ -57,6 +64,7 @@ function onmessage(message){
 	if( splitted_message[0] == "accept" || splitted_message[0]=="merge" )
 	{
 		setCookie( "uuid", splitted_message[1], 365 );
+		ws.send("identify:" + splitted_message[1])
 		return;
 	}
 	//alert(message.data);
@@ -87,8 +95,7 @@ function ping(){
 }
 
 function authorize(){
-	passcode = prompt("Enter pairing code");
-	ws.send( "authorize:" + passcode );
+	ws.send( "request:" );
 }
 
 function onopen(event){
