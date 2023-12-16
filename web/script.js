@@ -118,13 +118,12 @@ function init(){
 	window.addEventListener(
 	  "hashchange",
 	  () => {
-	  	console.log("hash changed");
-	  	console.log(hash_changed_by_code);
 	    if(!hash_changed_by_code){
-	    	console.log("initializing connection")
 	    	init_websocket();
 	    }
-	    hash_changed_by_code = false;
+	    else{
+	    	hash_changed_by_code = false;
+	    }
 	  },
 	  false,
 	);
@@ -133,11 +132,13 @@ function init(){
 
 function init_websocket(){
 	//alert("Hello");
-	code = location.hash.substr(1);
-	console.log("passcode:" + code);	
-/*	hash_changed_by_code = true;
-	location.hash = "#";
-	*/
+	code = window.location.hash.substr(1);
+	hash_changed_by_code = true;
+
+	
+	window.location.hash = "";
+
+	
 
 	let url = document.getElementById( "script" ).src;
 	console.log(url);
@@ -150,11 +151,6 @@ function init_websocket(){
 	ws.onmessage = onmessage;
 	ws.onopen = onopen;
 	ws.onclose = onclose;
-
-	//alert(ws);
-
-	//pingSent = false;
-	//setTimeout(ping, 1000);
 }
 
 function Click(id){
