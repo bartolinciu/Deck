@@ -56,7 +56,7 @@ class ImageManager:
 		if not self.symlinks_allowed():
 			definition["isLink"] = False
 
-		definition["hostingPath"] = os.path.join( "images", name + extension)
+		definition["hostingPath"] = os.path.join( "web/images", name + extension)
 
 		if definition["isLink"]:
 			os.symlink( definition["path"], definition["hostingPath"] )
@@ -71,7 +71,7 @@ class ImageManager:
 		new_name=new_definition.pop("name")
 
 		_, extension = os.path.splitext( new_definition["path"] )
-		new_definition["hostingPath"] = os.path.join( "images", new_name + extension)
+		new_definition["hostingPath"] = os.path.join( "web/images", new_name + extension)
 
 		path_touched = new_definition.pop("pathTouched")
 

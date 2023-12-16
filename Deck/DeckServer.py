@@ -8,6 +8,10 @@ import signal
 
 from Deck.DeckDevice import DeckDevice
 
+class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+	def __init__(self, *args, **kwargs):
+		super(HTTPRequestHandler, self).__init__(*args, directory = "web", **kwargs)
+
 class DeckServer:
 	def __init__(self, interfaces = ["0.0.0.0"], port = 8080):
 		self.devices = []
@@ -19,7 +23,7 @@ class DeckServer:
 		self.stopped = False
 		for i,interface in enumerate(interfaces):
 			server_address = (interface, port)
-			httpd = http.server.ThreadingHTTPServer( server_address, http.server.SimpleHTTPRequestHandler )
+			httpd = http.server.ThreadingHTTPServer( server_address, HTTPRequestHandler )
 			httpd.timeout = 1
 			def handle_timeout():
 				pass

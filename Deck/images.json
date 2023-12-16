@@ -1,12 +1,12 @@
 {
 	"Zmienione": {
-		"path": "C:\\coding\\Deck\\icon.ico",
+		"path": "D:\\coding\\Deck\\icon.ico",
 		"isLink": true,
-		"hostingPath": "images\\Zmienione.ico"
+		"hostingPath": "web\\images\\Zmienione.ico"
 	},
 	"Test7": {
-		"path": "C:\\coding\\Deck\\icon.ico",
+		"path": "D:\\coding\\Deck\\icon.ico",
 		"isLink": false,
-		"hostingPath": "images\\Test7.ico"
+		"hostingPath": "web\\images\\Test7.ico"
 	}
 }

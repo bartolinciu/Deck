@@ -38,6 +38,7 @@ let pongReceived = false;
 let pingSent = false;
 let reconnect = false;
 function onmessage(message){
+	alert(message.data)
 	if( message.data == "pong" ){
 		pongReceived = true;
 		return;
