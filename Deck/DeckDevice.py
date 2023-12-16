@@ -124,6 +124,7 @@ class DeckDevice:
 		message_str = str(message)
 		command = ""
 		argument = ""
+		print(message_str)
 
 		if ":" in message_str:
 			command, argument = message_str.split(":")
@@ -131,8 +132,6 @@ class DeckDevice:
 		if command == "request":
 			AuthorizationManager.request_authorization(self)
 			return
-
-
 
 		elif  command == "identify":
 			uuid = argument
@@ -142,7 +141,7 @@ class DeckDevice:
 				self.ready = True
 			except KeyError:
 				print("device configuration not found")
-				await self._send_message("reject")
+				AuthorizationManager.request_authorization(self)
 			
 			return
 
