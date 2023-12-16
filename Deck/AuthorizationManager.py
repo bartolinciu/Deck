@@ -16,8 +16,10 @@ class AuthorizationManager:
 				self.config = json.loads( f.read() )
 
 		self.delegate = None
-
 		self.timeout = 30
+		self.code_length = 6
+		self.modulo = 10 ** self.code_length
+		self.exponent = 123
 
 	def save(self):
 		with open(self.auth_file_path, "wt") as f:
@@ -38,8 +40,8 @@ class AuthorizationManager:
 		return self.config["passcode"]
 
 	def get_temp_passcode(self):
-		code = str(round( ((time.time()//self.timeout)*self.timeout ** 123) % 10000 ))
-		return "0" * (4-len(code)) + code
+		code = str(round( ((time.time()//self.timeout)*self.timeout ** self.exponent) % self.modulo ))
+		return "0" * (self.code_length-len(code)) + code
 
 	def set_delegate(self, delegate):
 		self.delegate = delegate

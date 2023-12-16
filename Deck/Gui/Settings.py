@@ -174,7 +174,7 @@ class PasscodeValidator(QValidator):
 
 	def validate(self, value, pos):
 		result = QValidator.Intermediate
-		if len(value) == 4 and value.isdigit():
+		if len(value) == 6 and value.isdigit():
 			result = QValidator.Acceptable
 		return (result, value, pos)
 
@@ -185,6 +185,7 @@ class AuthorizationPanel( QFrame ):
 		super( AuthorizationPanel, self ).__init__(*args, **kwargs)
 		self.setFrameShape(QFrame.StyledPanel)
 		self.setLayout(QHBoxLayout())
+		self.layout().addWidget(QLabel("New device Authorization method:"))
 		self.method_selector = QComboBox()
 		self.method_selector.addItem("Block all devices", "none")
 		self.method_selector.addItem("Allow all devices", "all")
@@ -200,6 +201,7 @@ class AuthorizationPanel( QFrame ):
 		self.passcode_display = QLabel( AuthorizationManager.get_temp_passcode() )
 		self.passcode_display.setStyleSheet("QLabel{ background-color:black; font-size:30px; } QLabel:hover{background-color:transparent;}")
 		self.passcode_display.setMaximumWidth( self.width()//2 )
+		self.passcode_display.setAlignment(Qt.AlignHCenter)
 		widget = QWidget()
 		widget.setLayout(QHBoxLayout())
 		widget.layout().addWidget( self.passcode_display )
@@ -213,6 +215,7 @@ class AuthorizationPanel( QFrame ):
 		self.passcode_edit.setValidator(self.passcode_validator)
 		self.passcode_edit.setEchoMode(QLineEdit.Password)
 		self.passcode_edit.editingFinished.connect( self.passcode_changed )
+		
 		self.passcode_visibility_checkbox = QCheckBox("Show characters")
 		self.passcode_visibility_checkbox.stateChanged.connect(lambda state: self.passcode_edit.setEchoMode({Qt.Unchecked:QLineEdit.Password, Qt.Checked:QLineEdit.Normal}[state]))
 		widget.layout().addWidget(self.passcode_edit)
