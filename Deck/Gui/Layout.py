@@ -446,7 +446,11 @@ class LayoutWidget(QWidget):
 		self.current_button = -1
 
 		horizontal = QHBoxLayout()
+		button_widget = QFrame()
+		button_widget.setFrameShape(QFrame.StyledPanel)
+
 		buttons = QGridLayout()
+		button_widget.setLayout(buttons)
 		
 		self.right_side_stack = QStackedLayout()
 
@@ -466,7 +470,7 @@ class LayoutWidget(QWidget):
 
 		self.right_side_stack.addWidget(self.button_parameters)
 
-		horizontal.addLayout(buttons)
+		horizontal.addWidget(button_widget)
 		horizontal.addLayout(self.right_side_stack)
 
 		self.buttons = []
