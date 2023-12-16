@@ -92,7 +92,7 @@ class DeckServer:
 
 
 		print( "Closing websocket connection" )
-		if not device.remove_websocket(websocket):
+		if not device.remove_websocket(websocket) and device in self.devices:
 			self.devices.remove(device)	
 			device.on_disconnect()
 
