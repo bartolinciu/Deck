@@ -20,25 +20,15 @@ function getCookie(cname) {
   return "";
 }
 
-function checkCookie() {
-  let user = getCookie("username");
-  if (user != "") {
-    alert("Welcome again " + user);
-  } else {
-    user = prompt("Please enter your name:", "");
-    if (user != "" && user != null) {
-      setCookie("username", user, 365);
-    }
-  }
-}
 
 
 let ws;
 let pongReceived = false;
 let pingSent = false;
 let reconnect = false;
+let code = "";
+
 function onmessage(message){
-	alert(message.data)
 	if( message.data == "pong" ){
 		pongReceived = true;
 		return;
@@ -55,7 +45,16 @@ function onmessage(message){
 	}
 
 	else if( message.data == "authorize" ){
-		passcode = prompt("Enter pairing code");
+		if( code =="" ){
+			passcode = prompt("Enter pairing code");
+			if(passcode == null){
+				ws.close();
+			}
+		}
+		else{
+			passcode = code; 
+			code = "";
+		}
 		ws.send( "passcode:" + passcode );
 		return;
 	}
@@ -78,8 +77,6 @@ function onmessage(message){
 			document.getElementById("Button"+i).innerHTML += "<img style=\"object-fit:contain;width:100%;height:80%;\" src = \"" + button.image + "\"><br>";
 		}
 		document.getElementById("Button"+i).innerHTML += button.name;
-		console.log(button)
-		
 	}
 }
 
@@ -115,8 +112,33 @@ function onclose(event){
 	}
 }
 
+var hash_changed_by_code = false;
+
 function init(){
+	window.addEventListener(
+	  "hashchange",
+	  () => {
+	  	console.log("hash changed");
+	  	console.log(hash_changed_by_code);
+	    if(!hash_changed_by_code){
+	    	console.log("initializing connection")
+	    	init_websocket();
+	    }
+	    hash_changed_by_code = false;
+	  },
+	  false,
+	);
+	init_websocket();
+}
+
+function init_websocket(){
 	//alert("Hello");
+	code = location.hash.substr(1);
+	console.log("passcode:" + code);	
+/*	hash_changed_by_code = true;
+	location.hash = "#";
+	*/
+
 	let url = document.getElementById( "script" ).src;
 	console.log(url);
 	url = url.substr( url.startsWith( "https://" ) ? 8: url.startsWith( "http://" ) ? 7 : 0 )

@@ -6,6 +6,9 @@ import ifaddr
 
 import re
 import threading
+import qrcode
+
+from PIL.ImageQt import ImageQt
 
 from Deck.AuthorizationManager import manager as AuthorizationManager
 
@@ -25,10 +28,66 @@ class CheckBox(QCheckBox):
 	def nextCheckState(self):
 		self.setCheckState( self.state_map[self.checkState()] )
 
+class ConnectDialog( QDialog ):
+	def __init__( self, ip, *args, **kwargs ):
+		super(ConnectDialog, self).__init__(*args, **kwargs)
+		self.setWindowTitle( "Connect" )
+		self.setLayout(QVBoxLayout())
+		url_layout = QHBoxLayout()
+		url_layout.addWidget(QLabel("Url: "))
+		self.QRCode = QLabel()
+		self.authorization_checkbox = QCheckBox("Include authorization")
+		self.authorization_checkbox.stateChanged.connect(self.authorization_changed)
+		self.link = QLabel()
+		url_layout.addWidget(self.link)
+		self.layout().addWidget(self.QRCode)
+		self.layout().addLayout(url_layout)
+		self.layout().addWidget(self.authorization_checkbox)
+		self.ip = ip
+		
+		self.include_authorization = False
+
+		self.timer = QTimer(self);
+		self.timer.timeout.connect(self.set_url)
+		self.timer.start(1000);
+
+		self.set_url()
+
+
+	def authorization_changed(self, status):
+		self.include_authorization = status==Qt.Checked
+		self.set_url()
+
+	def set_url(self):
+		url = "http://" + self.ip + ":8080"
+		if self.include_authorization:
+			authorization = "#"
+			match AuthorizationManager.get_method():
+				case "pass":
+					authorization += AuthorizationManager.get_passcode()
+
+				case "temp":
+					authorization += AuthorizationManager.get_temp_passcode()
+
+			url += authorization
+
+		self.QRCode.setPixmap( QPixmap.fromImage(ImageQt(qrcode.make(url)) ))
+		self.link.setText(url)
+
+
 class IPTreeItem( QTreeWidgetItem ):
-	def __init__( self, IP, *args, **kwargs ):
+	def __init__( self, IP, is_connected, *args, **kwargs ):
 		super( IPTreeItem, self ).__init__( [IP], type = QTreeWidgetItem.UserType+1, *args, **kwargs)
+		self.ip = IP
 		self.checkbox = QCheckBox()
+		self.connect_button = QPushButton("Connect")
+
+		self.connect_button.clicked.connect(self.show_dialog)
+		self.is_connected = is_connected
+
+	def show_dialog(self):
+		connect_dialog = ConnectDialog(self.ip)
+		connect_dialog.exec()
 
 class InterfaceTreeItem( QTreeWidgetItem ):
 
@@ -39,13 +98,18 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 		self.checkbox = CheckBox()
 		self.checkbox.setTristate(True)
 		self.checkbox.stateChanged.connect( self.interface_status_changed )
-		self.addChild( IPTreeItem("Any IP") )
+		self.addChild( IPTreeItem("Any IP", False ) )
 		self.child(0).checkbox.stateChanged.connect( self.any_ip_status_changed )
 		self.ips = []
+		first_interface = True
 		for ip in matching_ips:
 			ip_str = str(ip.ip)
 			self.ips.append(ip_str)
-			item = IPTreeItem( ip_str )
+			if first_interface:
+				self.child(0).ip = ip_str
+				self.child(0).is_connected = True
+				first_interface = False
+			item = IPTreeItem( ip_str, True )
 			item.checkbox.stateChanged.connect( self.ip_status_changed )
 			self.addChild( item )
 
@@ -89,6 +153,8 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 		for i in range( self.childCount() ):
 			child = self.child(i)
 			self.treeWidget().setItemWidget( child, 1, child.checkbox )
+			if child.is_connected:
+				self.treeWidget().setItemWidget( child, 2, child.connect_button )
 		self.treeWidget().setItemWidget( self, 1, self.checkbox )
 
 	def get_ips(self):
@@ -120,7 +186,7 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 			if ip in self.ips:
 				self.child( self.ips.index(ip) + 1 ).checkbox.setChecked( configuration["ips"][ip] )
 			else:
-				item = IPTreeItem( ip )
+				item = IPTreeItem( ip, False )
 				item.checkbox.setChecked( configuration["ips"][ip] )
 				item.checkbox.stateChanged.connect( self.ip_status_changed )
 				self.addChild(item)
@@ -131,8 +197,8 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 class InterfacesTreeWidget( QTreeWidget ):
 	def __init__( self, *args, **kwargs ):
 		super( InterfacesTreeWidget, self ).__init__( *args, **kwargs )
-		self.setColumnCount(2)
-		self.setHeaderLabels( ["", "Active"] )
+		self.setColumnCount(3)
+		self.setHeaderLabels( ["", "Active", "Connect"] )
 
 
 	def get_interfaces(self):
