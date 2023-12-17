@@ -1,11 +1,11 @@
 import os
 import re
 import json
-
+import Deck
 
 class BindingManager:
 	binding_file_name = "binding.json"
-	binding_file_path = os.path.join( os.path.dirname(__file__) , binding_file_name )
+	binding_file_path = os.path.join( Deck.config_path , binding_file_name )
 	def __init__(self, path = None):
 		if not os.path.isfile(self.binding_file_path):
 			self.bindings = []

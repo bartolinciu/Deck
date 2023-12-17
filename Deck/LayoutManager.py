@@ -3,9 +3,11 @@ import json
 	
 import shutil
 
+import Deck
+
 class LayoutManager:
 	suffix = ".json"
-	prefix = "layouts/"
+	prefix = Deck.layout_path
 
 	empty_layout = {
 		"1":{ "name": "" },
@@ -47,7 +49,7 @@ class LayoutManager:
 				if changed:
 					self.update_layout( layout_name, layout, visual_change = True )
 			else:
-				with open( LayoutManager.prefix+layout_name+LayoutManager.suffix ) as f:
+				with open( os.path.join( LayoutManager.prefix, layout_name+LayoutManager.suffix) ) as f:
 					data = f.read()
 					layout = json.loads(data)
 					changed = False
@@ -77,7 +79,7 @@ class LayoutManager:
 				if changed:
 					self.update_layout( layout_name, layout )
 			else:
-				with open( LayoutManager.prefix+layout_name+LayoutManager.suffix ) as f:
+				with open( os.path.join(LayoutManager.prefix, layout_name+LayoutManager.suffix) ) as f:
 					data = f.read()
 					layout = json.loads(data)
 					changed = False
@@ -125,7 +127,7 @@ class LayoutManager:
 		self.layouts.remove(old_name)
 		self.layouts.append(new_name)
 
-		os.rename( self.prefix + old_name + self.suffix, self.prefix + new_name + self.suffix )
+		os.rename( os.path.join(self.prefix, old_name + self.suffix), os.path.join(self.prefix, new_name + self.suffix) )
 
 		for listener in self.rename_listeners:
 			listener[1].on_rename(old_name, new_name)
@@ -136,7 +138,7 @@ class LayoutManager:
 			return None
 		if id in self.loaded_layouts:
 			return self.loaded_layouts[id]
-		with open( LayoutManager.prefix+id+LayoutManager.suffix ) as f:
+		with open( os.path.join(LayoutManager.prefix, id+LayoutManager.suffix) ) as f:
 			data = f.read()
 			data = json.loads(data)
 			self.loaded_layouts[id] = data
@@ -200,13 +202,13 @@ class LayoutManager:
 		if not layout_name in self.layouts:
 			return False
 
-		shutil.copyfile( self.prefix + layout_name + self.suffix, path )
+		shutil.copyfile( os.path.join(self.prefix, layout_name + self.suffix), path )
 
 	def update_layout( self, layout_name, layout, visual_change = True, skip_cache = False ):
 		if not skip_cache:
 			self.loaded_layouts[layout_name] = layout
 
-		path = LayoutManager.prefix+layout_name+LayoutManager.suffix
+		path = os.path.join(LayoutManager.prefix,layout_name+LayoutManager.suffix)
 
 		if layout == None:
 			os.unlink(path)

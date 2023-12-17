@@ -4,9 +4,11 @@ import time
 import random
 import json
 
+import Deck
+
 class AuthorizationManager:
 	auth_file_name = "auth.json"
-	auth_file_path = os.path.join( os.path.dirname(__file__) , auth_file_name )
+	auth_file_path = os.path.join( Deck.config_path , auth_file_name )
 	def __init__(self, path = None):
 		if not os.path.isfile(self.auth_file_path):
 			self.config = {"method": "all", "passcode":"", "blacklist": []}

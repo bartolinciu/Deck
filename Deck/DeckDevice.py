@@ -41,7 +41,7 @@ class DeckDevice:
 			if "image" in button:
 				definition = ImageManager.get_image_definition( button["image"] )
 				if definition:
-					return definition["hostingPath"][4:]
+					return definition["hostingPath"]
 			return None
 
 		await self._send_message( json.dumps( 

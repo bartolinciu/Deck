@@ -6,11 +6,12 @@ import threading
 import sys
 import signal
 
+import Deck
 from Deck.DeckDevice import DeckDevice
 
 class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 	def __init__(self, *args, **kwargs):
-		super(HTTPRequestHandler, self).__init__(*args, directory = "web", **kwargs)
+		super(HTTPRequestHandler, self).__init__(*args, directory = Deck.web_path, **kwargs)
 
 class DeckServer:
 	def __init__(self, interfaces = ["0.0.0.0"], port = 8080):

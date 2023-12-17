@@ -4,17 +4,19 @@ import os
 import json
 import shutil
 
+import Deck
 
 class ImageManager:
+	image_filename = "images.json"
+	image_path = os.path.join( Deck.config_path, image_filename )
 	def __init__(self):
 		self.update_listeners = []
-		filename = os.path.join( os.path.dirname(__file__) , "images.json" )
-		if not os.path.isfile( filename ):
+		if not os.path.isfile( self.image_path ):
 			self.images = {}
-			with open( filename, "wt" ) as f:
+			with open( self.image_path, "wt" ) as f:
 				f.write( "{}" )
 		else:
-			with open( filename, "rt" ) as f:
+			with open( self.image_path, "rt" ) as f:
 				self.images = json.loads( f.read() )
 
 	def add_image_update_listener( self, listener, priority ):
@@ -56,22 +58,25 @@ class ImageManager:
 		if not self.symlinks_allowed():
 			definition["isLink"] = False
 
-		definition["hostingPath"] = os.path.join( "web/images", name + extension)
+		definition["hostingPath"] = os.path.join( "images", name + extension)
 
 		if definition["isLink"]:
-			os.symlink( definition["path"], definition["hostingPath"] )
+			os.symlink( definition["path"], self.hosting_path_to_filesystem_path( definition["hostingPath"]) )
 		else:
-			shutil.copyfile( definition["path"], definition["hostingPath"] )
+			shutil.copyfile( definition["path"], self.hosting_path_to_filesystem_path( definition["hostingPath"]) )
 
 		self.images[ name ] = definition
 		self.save()
+
+	def hosting_path_to_filesystem_path(self, hosting_path):
+		return os.path.join(Deck.web_path, hosting_path)
 
 	def update_image( self, old_name, new_definition ):
 		old_definition = self.images[ old_name ]
 		new_name=new_definition.pop("name")
 
 		_, extension = os.path.splitext( new_definition["path"] )
-		new_definition["hostingPath"] = os.path.join( "web/images", new_name + extension)
+		new_definition["hostingPath"] = os.path.join( "images", new_name + extension)
 
 		path_touched = new_definition.pop("pathTouched")
 
@@ -83,14 +88,14 @@ class ImageManager:
 				(new_definition["isLink"] and old_definition["isLink"] and new_definition["path"] == old_definition["path"]) or \
 				( not path_touched and not new_definition["isLink"] and not old_definition["isLink"] ) \
 			):
-			os.rename( old_definition["hostingPath"], new_definition["hostingPath"] )
+			os.rename( self.hosting_path_to_filesystem_path(old_definition["hostingPath"]), self.hosting_path_to_filesystem_path(new_definition["hostingPath"]) )
 		else:
-			if os.path.isfile( old_definition["hostingPath"] ):
-				os.unlink( old_definition["hostingPath"] )	
+			if os.path.isfile( self.hosting_path_to_filesystem_path(old_definition["hostingPath"] ) ):
+				os.unlink( self.hosting_path_to_filesystem_path( old_definition["hostingPath"] ) )	
 			if new_definition["isLink"]:
-				os.symlink( new_definition["path"], new_definition["hostingPath"] )
+				os.symlink( new_definition["path"], self.hosting_path_to_filesystem_path( new_definition["hostingPath"] ) )
 			else:
-				shutil.copyfile( new_definition["path"], new_definition["hostingPath"] )
+				shutil.copyfile( new_definition["path"], self.hosting_path_to_filesystem_path( new_definition["hostingPath"] ) )
 
 
 		self.images.pop( old_name )
@@ -103,8 +108,8 @@ class ImageManager:
 
 	def delete_image( self, name ):
 		definition = self.images[name]
-		if os.path.isfile( definition["hostingPath"] ):
-			os.unlink( definition["hostingPath"] )		
+		if os.path.isfile( self.hosting_path_to_filesystem_path( definition["hostingPath"] ) ):
+			os.unlink( self.hosting_path_to_filesystem_path(definition["hostingPath"] ) )		
 
 		self.images.pop( name )
 		self.save()
@@ -113,7 +118,7 @@ class ImageManager:
 			listener[1].on_image_update(old_name, None)
 
 	def save(self):
-		with open( os.path.join( os.path.dirname(__file__) , "images.json" ), "wt" ) as f:
+		with open( self.image_path, "wt" ) as f:
 			f.write( json.dumps( self.images, indent="\t" ) )
 
 manager = ImageManager()

@@ -1,0 +1,92 @@
+[
+	{
+		"name": "Ethernet",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"169.254.71.172": false,
+			"169.254.140.99": false,
+			"192.168.137.2": false
+		}
+	},
+	{
+		"name": "OpenVPN Wintun",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"169.254.131.100": false,
+			"169.254.216.5": false
+		}
+	},
+	{
+		"name": "OpenVPN TAP-Windows6",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"169.254.165.135": false,
+			"10.7.19.234": false,
+			"10.7.19.218": false
+		}
+	},
+	{
+		"name": "Po\u0142\u0105czenie lokalne* 2",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"169.254.63.80": false
+		}
+	},
+	{
+		"name": "Po\u0142\u0105czenie lokalne* 5",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"169.254.55.204": false,
+			"169.254.170.166": false
+		}
+	},
+	{
+		"name": "Wi-Fi",
+		"isActive": true,
+		"useAnyIp": false,
+		"ips": {
+			"192.168.1.102": true,
+			"192.168.43.41": true,
+			"157.158.126.220": false,
+			"192.168.1.163": false,
+			"192.168.1.178": false
+		}
+	},
+	{
+		"name": "Loopback Pseudo-Interface 1",
+		"isActive": true,
+		"useAnyIp": false,
+		"ips": {
+			"127.0.0.1": true
+		}
+	},
+	{
+		"name": "Ethernet 2",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"192.168.1.156": true
+		}
+	},
+	{
+		"name": "VirtualBox Host-Only Network",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"192.168.56.1": false
+		}
+	},
+	{
+		"name": "Po\u0142\u0105czenie lokalne* 13",
+		"isActive": false,
+		"useAnyIp": false,
+		"ips": {
+			"169.254.160.122": false
+		}
+	}
+]

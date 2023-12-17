@@ -14,6 +14,7 @@ import os
 import json
 import sys
 
+import Deck
 
 DeckAction = namedtuple( "DeckAction", "name label parameters function" )
 
@@ -23,8 +24,10 @@ if sys.platform=="win32":
 
 class DeckController:
 	actions = {  }
+	network_filename = "network.json"
+	network_path = os.path.join( Deck.config_path, network_filename )
 	def __init__(self):
-		with open( os.path.join( os.path.dirname(__file__) , "network.json" ), "rt" ) as f:
+		with open( self.network_path, "rt" ) as f:
 			self.network_configuration = json.loads( f.read() )
 
 		ips = self.get_ips_from_configuration(self.network_configuration)
@@ -186,7 +189,7 @@ class DeckController:
 
 	def set_network_configuration(self, settings):
 		self.network_configuration = settings
-		with open( os.path.join( os.path.dirname(__file__) , "network.json" ), "wt") as f:
+		with open( self.network_path, "wt") as f:
 			f.write( json.dumps( self.network_configuration, indent = "\t" ) )
 		ips = self.get_ips_from_configuration(settings)
 		self.change_interfaces(ips)

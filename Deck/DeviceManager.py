@@ -2,7 +2,9 @@ import random
 import os
 import json
 
-devicesPath = "devices"
+import Deck
+
+devicesPath = Deck.devices_path
 
 def generateUUID():
 	return "".join(["%02x" % i for i in random._urandom(8)])

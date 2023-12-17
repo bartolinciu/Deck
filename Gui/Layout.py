@@ -540,7 +540,7 @@ class LayoutWidget(QWidget):
 			if "image" in button and button["image"]!=None:
 				definition = ImageManager.get_image_definition( button["image"] )
 				if definition:
-					pixmap = QPixmap( definition["hostingPath"] )
+					pixmap = QPixmap( ImageManager.hosting_path_to_filesystem_path(definition["hostingPath"]) )
 					pixmap = pixmap.scaled( QSize(45,40), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation )
 					icon = QIcon(pixmap)
 					self.buttons[i].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextUnderIcon )

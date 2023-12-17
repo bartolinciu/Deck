@@ -1,6 +1,8 @@
 import json
 import pynput
 import time
+import Deck
+import os
 
 
 keyboard = pynput.keyboard.Controller()
@@ -18,8 +20,10 @@ for button in pynput.mouse.Button:
 
 
 class MacroManager:
+	macro_file_name = "macros.json"
+	macro_file_path = os.path.join( Deck.config_path, macro_file_name )
 	def __init__(self):
-		with open("macros.json") as f:
+		with open( self.macro_file_path ) as f:
 			data = f.read()
 			self.macros = json.loads(data)
 
@@ -34,7 +38,7 @@ class MacroManager:
 			self.macros[name] = macro
 		else:
 			self.macros.pop(name)
-		with open( "macros.json", "wt" ) as f:
+		with open( self.macro_file_path, "wt" ) as f:
 			data = json.dumps( self.macros, indent = "\t" )
 			f.write( data )
 
