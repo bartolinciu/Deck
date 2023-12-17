@@ -10,9 +10,9 @@ import sys
 import ifaddr
 import re
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from Deck.DeckDevice import DeckDevice
 from Deck.DeckController import DeckController
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 	tray.setIcon(icon)
 	tray.setVisible(True)
 
-	tray.activated.connect(lambda reason: window.show() if reason != QSystemTrayIcon.Context else None  )
+	tray.activated.connect(lambda reason: window.show() if reason != QSystemTrayIcon.ActivationReason.Context else None  )
 
 	menu = QMenu()
 	option1 = QAction("Open Deck")
@@ -140,7 +140,7 @@ if __name__ == "__main__":
 	
 	window.show()
 
-	app.exec_()
+	app.exec()
 
 	controller.stop()
 

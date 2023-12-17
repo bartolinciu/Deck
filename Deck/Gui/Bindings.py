@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from Deck.BindingManager import manager as BindingManager
 from Deck.LayoutManager import layout_manager as LayoutManager
@@ -20,18 +20,18 @@ class WindowTitleValidator(QValidator):
 		return self.default
 
 	def validate(self, value, pos):
-		result = QValidator.Acceptable
+		result = QValidator.State.Acceptable
 		if value != "*":
 			try:
 				re.compile( value )
 			except re.error:
-				result = QValidator.Intermediate
+				result = QValidator.State.Intermediate
 		return (result, value, pos)
 
 
 class BindingTreeItem( QTreeWidgetItem ):
 	def __init__( self, binding, *args, **kwargs ):
-		super( BindingTreeItem, self ).__init__( type = QTreeWidgetItem.UserType+1, *args, **kwargs)
+		super( BindingTreeItem, self ).__init__( type = QTreeWidgetItem.ItemType.UserType+1, *args, **kwargs)
 		self.application = QLineEdit()
 		self.title = QLineEdit()
 		self.device = QComboBox()
@@ -116,7 +116,7 @@ class BindingsPage(QWidget):
 		self.tree.itemChanged.connect(self.binding_changed)
 
 		frame = QFrame()
-		frame.setFrameShape( QFrame.StyledPanel )
+		frame.setFrameShape( QFrame.Shape.StyledPanel )
 
 		self.add_binding_button = QPushButton("\u271a")
 		self.add_binding_button.clicked.connect( self.add_binding )

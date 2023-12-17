@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 from Deck.LayoutManager import layout_manager as LayoutManager
 from Deck.DeviceManager import device_manager as DeviceManager
 from Deck.BindingManager import manager as BindingManager
@@ -14,7 +14,7 @@ class DevicePropertiesWidget(QFrame):
 		super( DevicePropertiesWidget, self ).__init__(*args, **kwargs)
 		self.set_by_code = False
 			
-		self.setFrameShape(QFrame.StyledPanel)
+		self.setFrameShape(QFrame.Shape.StyledPanel)
 		self.properties = None
 		layout = QGridLayout()
 		layout.addWidget( QLabel("Name"), 0, 0 )
@@ -101,8 +101,8 @@ class ScrollableButtonSelector(QScrollArea):
 		self.layout = QVBoxLayout()
 		self.content = QWidget()
 		self.content.setLayout( self.layout )
-		self.setHorizontalScrollBarPolicy( Qt.ScrollBarAlwaysOff )
-		self.setVerticalScrollBarPolicy( Qt.ScrollBarAsNeeded )
+		self.setHorizontalScrollBarPolicy( Qt.ScrollBarPolicy.ScrollBarAlwaysOff )
+		self.setVerticalScrollBarPolicy( Qt.ScrollBarPolicy.ScrollBarAsNeeded )
 		self.setWidgetResizable( True )
 		self.setWidget( self.content )
 
@@ -201,16 +201,16 @@ class DevicesPage(QWidget):
 	def merge_device(self, target_uuid):
 		if self.current_device != -1:
 			msg = QMessageBox()
-			msg.setIcon(QMessageBox.Information)
+			msg.setIcon(QMessageBox.Icon.Information)
 			name = DeviceManager.get_config(target_uuid).get_name()
 			msg.setText("Are you sure you want to merge this device with " + name + "?")
 			msg.setInformativeText("This device will be identified as " + name + ".\nAll bindings connected to this device will be reassigned to new device\nThis operation is irreversible.\nNote: If any of the devices using this identifier is currently disconnected, it will have to be authorized again and merged with " + name)
 			msg.setWindowTitle("Merge?")
-			msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+			msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
 
-			retval = msg.exec_()
+			retval = msg.exec()
 
-			if not retval == QMessageBox.Ok:
+			if not retval == QMessageBox.StandardButton.Ok:
 				return
 
 			device = self.devices[self.current_device]
@@ -234,16 +234,16 @@ class DevicesPage(QWidget):
 	def forget_device(self):
 
 		msg = QMessageBox()
-		msg.setIcon(QMessageBox.Information)
+		msg.setIcon(QMessageBox.Icon.Information)
 
 		msg.setText("Are you sure you want to forget this device?")
 		msg.setInformativeText("This operation is irreversible")
 		msg.setWindowTitle("Forget?")
-		msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+		msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
 
-		retval = msg.exec_()
+		retval = msg.exec()
 
-		if not retval == QMessageBox.Ok:
+		if not retval == QMessageBox.StandardButton.Ok:
 			return
 
 		if self.current_device != -1:
@@ -262,7 +262,7 @@ class DevicesPage(QWidget):
 		self.properties_panel.set_properties( self.devices[i].get_configuration(), is_connected = True )
 
 	def event(self, event):
-		if event.type() == QEvent.User + 1:
+		if event.type() == QEvent.Type.User + 1:
 			self.list_devices()
 				
 				
@@ -337,5 +337,5 @@ class DevicesPage(QWidget):
 			
 
 	def refresh(self):
-		QCoreApplication.postEvent(self, QEvent(QEvent.User + 1) )
+		QCoreApplication.postEvent(self, QEvent(QEvent.Type.User + 1) )
 

@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from Deck.MacroManager import manager
 from Deck.LayoutManager import layout_manager
@@ -16,8 +16,8 @@ class ScrollableButtonSelector(QScrollArea):
 		self.layout = QVBoxLayout()
 		self.content = QWidget()
 		self.content.setLayout( self.layout )
-		self.setHorizontalScrollBarPolicy( Qt.ScrollBarAlwaysOff )
-		self.setVerticalScrollBarPolicy( Qt.ScrollBarAsNeeded )
+		self.setHorizontalScrollBarPolicy( Qt.ScrollBarPolicy.ScrollBarAlwaysOff )
+		self.setVerticalScrollBarPolicy( Qt.ScrollBarPolicy.ScrollBarAsNeeded )
 		self.setWidgetResizable( True )
 		self.setWidget( self.content )
 
@@ -93,7 +93,7 @@ class KeyEdit(QLineEdit):
 	key_changed = pyqtSignal( str )
 
 	def on_press(self,key):
-		event = QEvent(QEvent.User + 4)
+		event = QEvent(QEvent.Type.User + 4)
 		event.key = key
 		QCoreApplication.postEvent(self, event )
 		
@@ -120,12 +120,12 @@ class KeyEdit(QLineEdit):
 
 
 	def event(self, event):
-		if event.type() == QEvent.User + 4:
+		if event.type() == QEvent.Type.User + 4:
 			self.set_key( event.key )
 				
 			self.key_changed.emit( self.key )
 			return True
-		if event.type() == QEvent.KeyPress:
+		if event.type() == QEvent.Type.KeyPress:
 			return True
 		return QLineEdit.event(self,event)
 
@@ -155,7 +155,7 @@ class StepProperties(QFrame):
 	flag_y      = 0x10
 	def __init__(self, *args, **kwargs):
 		super( StepProperties, self ).__init__(*args, **kwargs)
-		self.setFrameShape(QFrame.StyledPanel)
+		self.setFrameShape(QFrame.Shape.StyledPanel)
 
 		self.triggered_by_code = False
 		self.matcher = re.compile("\s*\\d+([\\.,]\\d{1,2})?")
@@ -407,7 +407,7 @@ class MacroProperties( QFrame ):
 	name_changed = pyqtSignal(str)
 	def __init__( self, *args, **kwargs ):
 		super( MacroProperties, self ).__init__( *args, **kwargs )
-		self.setFrameShape( QFrame.StyledPanel )
+		self.setFrameShape( QFrame.Shape.StyledPanel )
 
 		layout = QGridLayout()
 
@@ -453,7 +453,7 @@ class MacrosPage(QWidget):
 		self.macro_properties.name_changed.connect(self.macro_name_changed)
 
 		macro_controlls = QFrame()
-		macro_controlls.setFrameShape(QFrame.StyledPanel)
+		macro_controlls.setFrameShape(QFrame.Shape.StyledPanel)
 		macro_controlls_layout = QHBoxLayout()
 
 		self.new_macro = QPushButton("\u271a")
@@ -467,7 +467,7 @@ class MacrosPage(QWidget):
 
 
 		step_controlls = QFrame()
-		step_controlls.setFrameShape( QFrame.StyledPanel )
+		step_controlls.setFrameShape( QFrame.Shape.StyledPanel )
 		step_controlls_layout = QHBoxLayout()
 
 		self.new_step = QPushButton("\u271a")
@@ -493,11 +493,11 @@ class MacrosPage(QWidget):
 		layout.addLayout(grid)
 
 		placeholder_widget = QFrame()
-		box_layout = QBoxLayout(QBoxLayout.LeftToRight)
+		box_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight)
 		label = QLabel("Select layout to edit its properties")
-		label.setAlignment( Qt.AlignCenter )
-		box_layout.addWidget(label, Qt.AlignCenter)
-		placeholder_widget.setFrameShape( QFrame.StyledPanel )
+		label.setAlignment( Qt.AlignmentFlag.AlignCenter )
+		box_layout.addWidget(label, Qt.AlignmentFlag.AlignCenter)
+		placeholder_widget.setFrameShape( QFrame.Shape.StyledPanel )
 		placeholder_widget.setLayout(box_layout)
 
 		self.stack = QStackedLayout()

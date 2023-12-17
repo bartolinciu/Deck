@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from Deck.LayoutManager import layout_manager
 from Deck.DeckController import DeckController
@@ -25,7 +25,7 @@ class ActionParametersWidget( QFrame ):
 	parameters_changed = pyqtSignal( list )
 	def __init__( self, parameters_description, *args, **kwargs ):
 		super( ActionParametersWidget, self ).__init__( *args, **kwargs )
-		self.setFrameShape( QFrame.StyledPanel )
+		self.setFrameShape( QFrame.Shape.StyledPanel )
 		grid = QGridLayout()
 		self.setLayout( grid )
 		self.parameters_description = {}
@@ -172,7 +172,7 @@ class ImagePropertiesDialog( QDialog ):
 		button_save = QPushButton("Save")
 		button_save.clicked.connect( self.save )
 		button_cancel = QPushButton("Cancel")
-		button_cancel.clicked.connect( lambda: self.done( QDialog.Rejected ) )
+		button_cancel.clicked.connect( lambda: self.done( QDialog.DialogCode.Rejected ) )
 		button_layout.addWidget( button_save )
 		button_layout.addWidget( button_cancel )
 
@@ -214,7 +214,7 @@ class ImagePropertiesDialog( QDialog ):
 		elif self.path.text() == "" and self.method_link.isChecked():
 			self.notification.setText("Link path cannot be empty")
 		else:
-			self.done( QDialog.Accepted )
+			self.done( QDialog.DialogCode.Accepted )
 
 	def name_edited(self, text):
 		if text != self.old_name and text in self.blacklist:
@@ -264,7 +264,7 @@ class ImageManagementDialog( QDialog ):
 	def import_image(self):
 		properties_dialog = ImagePropertiesDialog( self )
 		result = properties_dialog.exec()
-		if result == QDialog.Accepted:
+		if result == QDialog.DialogCode.Accepted:
 			definition = properties_dialog.get_definition()
 			self.list_widget.addItem(definition["name"])
 			ImageManager.import_image( definition )			
@@ -282,7 +282,7 @@ class ImageManagementDialog( QDialog ):
 		properties_dialog = ImagePropertiesDialog( self, definition = definition, blacklist = list( ImageManager.get_images() ) )
 		result = properties_dialog.exec()
 
-		if result == QDialog.Accepted:
+		if result == QDialog.DialogCode.Accepted:
 			definition = properties_dialog.get_definition()
 			if current_image != definition["name"]:
 				self.list_widget.currentItem().setText( definition["name"] )
@@ -307,7 +307,7 @@ class ButtonPropertiesPanel(QWidget):
 		self.set_by_code = False
 		self.setLayout( QVBoxLayout() )
 		frame = QFrame()
-		frame.setFrameShape(QFrame.StyledPanel)
+		frame.setFrameShape(QFrame.Shape.StyledPanel)
 		grid = QGridLayout()
 		frame.setLayout(grid)
 		self.layout().addWidget( frame )
@@ -408,7 +408,8 @@ class ButtonPropertiesPanel(QWidget):
 		self.name_box.setText(button["name"])
 		if "action" in button:
 			self.action_box.setCurrentIndex( self.action_box.findData( button["action"] ) )
-			self.parameter_stack.currentWidget().set_parameters( button["parameters"] )
+			if "parameters" in button:
+				self.parameter_stack.currentWidget().set_parameters( button["parameters"] )
 		else:
 			self.action_box.setCurrentIndex(0)
 		if "image" in button and self.image_selector.findText(button["image"]) != -1:
@@ -447,7 +448,7 @@ class LayoutWidget(QWidget):
 
 		horizontal = QHBoxLayout()
 		button_widget = QFrame()
-		button_widget.setFrameShape(QFrame.StyledPanel)
+		button_widget.setFrameShape(QFrame.Shape.StyledPanel)
 
 		buttons = QGridLayout()
 		button_widget.setLayout(buttons)
@@ -455,11 +456,11 @@ class LayoutWidget(QWidget):
 		self.right_side_stack = QStackedLayout()
 
 		placeholder_widget = QFrame()
-		box_layout = QBoxLayout(QBoxLayout.LeftToRight)
+		box_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight)
 		label = QLabel("Select button to edit its properties")
-		label.setAlignment( Qt.AlignCenter )
-		box_layout.addWidget(label, Qt.AlignCenter)
-		placeholder_widget.setFrameShape( QFrame.StyledPanel )
+		label.setAlignment( Qt.AlignmentFlag.AlignCenter )
+		box_layout.addWidget(label, Qt.AlignmentFlag.AlignCenter)
+		placeholder_widget.setFrameShape( QFrame.Shape.StyledPanel )
 		placeholder_widget.setLayout(box_layout)
 
 		self.right_side_stack.addWidget(placeholder_widget)
@@ -535,14 +536,14 @@ class LayoutWidget(QWidget):
 			button = self.layout[str(i+1)]
 			self.buttons[i].setText( button["name"] )
 			icon = QIcon()
-			self.buttons[i].setToolButtonStyle( Qt.ToolButtonTextOnly )
+			self.buttons[i].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextOnly )
 			if "image" in button and button["image"]!=None:
 				definition = ImageManager.get_image_definition( button["image"] )
 				if definition:
 					pixmap = QPixmap( definition["hostingPath"] )
-					pixmap = pixmap.scaled( QSize(45,40), Qt.KeepAspectRatio, Qt.SmoothTransformation )
+					pixmap = pixmap.scaled( QSize(45,40), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation )
 					icon = QIcon(pixmap)
-					self.buttons[i].setToolButtonStyle( Qt.ToolButtonTextUnderIcon )
+					self.buttons[i].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextUnderIcon )
 				
 
 			self.buttons[i].setIcon(icon)
@@ -558,8 +559,8 @@ class ToolButton( QToolButton ):
 		p = QStylePainter(self)
 		opt = QStyleOptionToolButton()
 		self.initStyleOption( opt )
-		opt.features &= ( ~QStyleOptionToolButton.HasMenu )
-		p.drawComplexControl( QStyle.CC_ToolButton, opt )
+		opt.features &= ( ~QStyleOptionToolButton.ToolButtonFeature.HasMenu )
+		p.drawComplexControl( QStyle.ComplexControl.CC_ToolButton, opt )
 
 class LayoutValidator( QValidator ):
 	def __init__(self, old_name, blacklist, *args, **kwargs):
@@ -572,9 +573,9 @@ class LayoutValidator( QValidator ):
 
 	def validate(self, value, pos):
 		if value != self.old_name and value in self.blacklist:
-			return (QValidator.Intermediate, value, pos)
+			return (QValidator.State.Intermediate, value, pos)
 		else:
-			return (QValidator.Acceptable, value, pos)
+			return (QValidator.State.Acceptable, value, pos)
 
 
 
@@ -610,14 +611,14 @@ class LayoutsPage(QWidget):
 
 		layout_menu_button.setMenu(self.menu)
 		layout_menu_button.setText("\u2022\u2022\u2022")
-		layout_menu_button.setPopupMode( QToolButton.InstantPopup )
+		layout_menu_button.setPopupMode( QToolButton.ToolButtonPopupMode.InstantPopup )
 
 		top_layout.addWidget( self.layoutSelector )
 		top_layout.addWidget(layout_menu_button)
 
 		self.list_layouts()
 
-		self.layoutSelector.setInsertPolicy(QComboBox.InsertAtCurrent)		
+		self.layoutSelector.setInsertPolicy(QComboBox.InsertPolicy.InsertAtCurrent)		
 
 		self.layoutSelector.currentIndexChanged.connect(self.select_layout)
 		
@@ -652,13 +653,13 @@ class LayoutsPage(QWidget):
 		file = QFileDialog.getOpenFileName( parent = self, caption = "Select layout", filter = text_filter )
 		if not layout_manager.import_layout( file[0] ):
 			msg = QMessageBox()
-			msg.setIcon(QMessageBox.Warning)
+			msg.setIcon(QMessageBos.Icon.Warning)
 
 			msg.setText("Couldn't import layout")
 			msg.setWindowTitle("Warning")
-			msg.setStandardButtons(QMessageBox.Ok)
+			msg.setStandardButtons(QMessageBox.StandardButton.Ok)
 
-			retval = msg.exec_()
+			retval = msg.exec()
 		else:
 			self.list_layouts()
 			self.layoutSelector.setCurrentIndex(self.layoutSelector.count()-1)
@@ -684,13 +685,13 @@ class LayoutsPage(QWidget):
 			self.layoutSelector.setCurrentIndex( self.layoutSelector.currentIndex()+1 )
 		else:
 			msg = QMessageBox()
-			msg.setIcon(QMessageBox.Warning)
+			msg.setIcon(QMessageBos.Icon.Warning)
 
 			msg.setText("Couldn't duplicate layout")
 			msg.setWindowTitle("Warning")
-			msg.setStandardButtons(QMessageBox.Ok)
+			msg.setStandardButtons(QMessageBox.StandardButton.Ok)
 
-			retval = msg.exec_()
+			retval = msg.exec()
 
 	def export_layout(self):
 		text_filter = "Layout files (*.json)"

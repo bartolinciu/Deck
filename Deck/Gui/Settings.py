@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 import ifaddr
 
@@ -18,12 +18,12 @@ class CheckBox(QCheckBox):
 	def __init__( self, *args, **kwargs ):
 		super( CheckBox, self ).__init__(*args, **kwargs)
 		self.state_map = {
-			Qt.Checked:Qt.Unchecked,
-			Qt.Unchecked:Qt.Checked,
-			Qt.PartiallyChecked:Qt.Unchecked
+			Qt.CheckState.Checked:Qt.CheckState.Unchecked,
+			Qt.CheckState.Unchecked:Qt.CheckState.Checked,
+			Qt.CheckState.PartiallyChecked:Qt.CheckState.Unchecked
 			}
 	def set_on_state(self, on_state):
-		self.state_map[Qt.Unchecked] = on_state
+		self.state_map[Qt.CheckState.Unchecked] = on_state
 
 	def nextCheckState(self):
 		self.setCheckState( self.state_map[self.checkState()] )
@@ -55,7 +55,7 @@ class ConnectDialog( QDialog ):
 
 
 	def authorization_changed(self, status):
-		self.include_authorization = status==Qt.Checked
+		self.include_authorization = status==Qt.CheckState.Checked.value
 		self.set_url()
 
 	def set_url(self):
@@ -77,7 +77,7 @@ class ConnectDialog( QDialog ):
 
 class IPTreeItem( QTreeWidgetItem ):
 	def __init__( self, IP, is_connected, *args, **kwargs ):
-		super( IPTreeItem, self ).__init__( [IP], type = QTreeWidgetItem.UserType+1, *args, **kwargs)
+		super( IPTreeItem, self ).__init__( [IP], type = QTreeWidgetItem.ItemType.UserType+1, *args, **kwargs)
 		self.ip = IP
 		self.checkbox = QCheckBox()
 		self.connect_button = QPushButton("Connect")
@@ -94,7 +94,7 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 	def __init__( self, interface, *args, **kwargs ):
 		matching_ips = [ ip for ip in interface.ips if bool( matcher.match( str( ip.ip) ) ) ]
 		self.name = matching_ips[0].nice_name if len(matching_ips) > 0 else interface.nice_name
-		super( InterfaceTreeItem, self ).__init__( [ self.name ],type = QTreeWidgetItem.UserType+1, *args, **kwargs)
+		super( InterfaceTreeItem, self ).__init__( [ self.name ],type = QTreeWidgetItem.ItemType.UserType+1, *args, **kwargs)
 		self.checkbox = CheckBox()
 		self.checkbox.setTristate(True)
 		self.checkbox.stateChanged.connect( self.interface_status_changed )
@@ -114,30 +114,30 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 			self.addChild( item )
 
 	def interface_status_changed(self, state):
-		if state == Qt.Checked:
+		if state == Qt.CheckState.Checked.value:
 			children_checked = False
 			for i in range( self.childCount() ):
 				if self.child(i).checkbox.isChecked():
 					children_checked = True
 					break
 			if not children_checked:
-				self.child(0).checkbox.setCheckState(Qt.Checked)
+				self.child(0).checkbox.setCheckState(Qt.CheckState.Checked)
 
 	def any_ip_status_changed( self, state ):
-		if state == Qt.Checked:
-			if self.checkbox.checkState() != Qt.Unchecked:
-				self.checkbox.setCheckState( Qt.Checked )
-			self.checkbox.set_on_state( Qt.Checked )
+		if state == Qt.CheckState.Checked.value:
+			if self.checkbox.checkState() != Qt.CheckState.Unchecked:
+				self.checkbox.setCheckState( Qt.CheckState.Checked )
+			self.checkbox.set_on_state( Qt.CheckState.Checked )
 			for i in range(1, self.childCount()):
-				self.child(i).checkbox.setCheckState( Qt.Unchecked )
+				self.child(i).checkbox.setCheckState( Qt.CheckState.Unchecked )
 
 
 	def ip_status_changed( self, state ):
-		if state == Qt.Checked:
-			if self.checkbox.checkState() != Qt.Unchecked:
-				self.checkbox.setCheckState( Qt.PartiallyChecked )
-			self.checkbox.set_on_state( Qt.PartiallyChecked )
-			self.child(0).checkbox.setCheckState( Qt.Unchecked )
+		if state == Qt.CheckState.Checked.value:
+			if self.checkbox.checkState() != Qt.CheckState.Unchecked:
+				self.checkbox.setCheckState( Qt.CheckState.PartiallyChecked )
+			self.checkbox.set_on_state( Qt.CheckState.PartiallyChecked )
+			self.child(0).checkbox.setCheckState( Qt.CheckState.Unchecked )
 		else:
 			checked = False
 			for i in range( self.childCount()):
@@ -146,7 +146,7 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 					break
 
 			if not checked:
-				self.child(0).checkbox.setCheckState( Qt.Checked )
+				self.child(0).checkbox.setCheckState( Qt.CheckState.Checked )
 
 
 	def set_widgets(self):
@@ -166,7 +166,7 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 	def get_configuration(self):
 		interface = { 
 				"name" : self.name,
-				"isActive":self.checkbox.checkState() in [Qt.Checked, Qt.PartiallyChecked],
+				"isActive":self.checkbox.checkState() in [Qt.CheckState.Checked, Qt.CheckState.PartiallyChecked],
 				"useAnyIp": self.child(0).checkbox.isChecked(),
 				"ips": self.get_ips()
 				}
@@ -175,12 +175,12 @@ class InterfaceTreeItem( QTreeWidgetItem ):
 	def configure(self, configuration):
 		if configuration["isActive"]:
 			if configuration["useAnyIp"]:
-				self.checkbox.setCheckState( Qt.Checked )
+				self.checkbox.setCheckState( Qt.CheckState.Checked )
 			elif len(configuration["ips"]) > 0:
-				self.checkbox.setCheckState(Qt.PartiallyChecked)
+				self.checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
 
 		if configuration["useAnyIp"]:
-			self.child(0).checkbox.setCheckState(Qt.Checked)
+			self.child(0).checkbox.setCheckState(Qt.CheckState.Checked)
 
 		for ip in configuration["ips"]:
 			if ip in self.ips:
@@ -239,9 +239,9 @@ class PasscodeValidator(QValidator):
 		return self.default
 
 	def validate(self, value, pos):
-		result = QValidator.Intermediate
+		result = QValidator.State.Intermediate
 		if len(value) == 6 and value.isdigit():
-			result = QValidator.Acceptable
+			result = QValidator.State.Acceptable
 		return (result, value, pos)
 
 
@@ -249,7 +249,7 @@ class PasscodeValidator(QValidator):
 class AuthorizationPanel( QFrame ):
 	def __init__(self, *args, **kwargs):
 		super( AuthorizationPanel, self ).__init__(*args, **kwargs)
-		self.setFrameShape(QFrame.StyledPanel)
+		self.setFrameShape(QFrame.Shape.StyledPanel)
 		self.setLayout(QHBoxLayout())
 		self.layout().addWidget(QLabel("New device Authorization method:"))
 		self.method_selector = QComboBox()
@@ -267,7 +267,7 @@ class AuthorizationPanel( QFrame ):
 		self.passcode_display = QLabel( AuthorizationManager.get_temp_passcode() )
 		self.passcode_display.setStyleSheet("QLabel{ background-color:black; font-size:30px; } QLabel:hover{background-color:transparent;}")
 		self.passcode_display.setMaximumWidth( self.width()//2 )
-		self.passcode_display.setAlignment(Qt.AlignHCenter)
+		self.passcode_display.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 		widget = QWidget()
 		widget.setLayout(QHBoxLayout())
 		widget.layout().addWidget( self.passcode_display )
@@ -279,11 +279,11 @@ class AuthorizationPanel( QFrame ):
 
 		self.passcode_edit = QLineEdit(AuthorizationManager.get_passcode())
 		self.passcode_edit.setValidator(self.passcode_validator)
-		self.passcode_edit.setEchoMode(QLineEdit.Password)
+		self.passcode_edit.setEchoMode(QLineEdit.EchoMode.Password)
 		self.passcode_edit.editingFinished.connect( self.passcode_changed )
 		
 		self.passcode_visibility_checkbox = QCheckBox("Show characters")
-		self.passcode_visibility_checkbox.stateChanged.connect(lambda state: self.passcode_edit.setEchoMode({Qt.Unchecked:QLineEdit.Password, Qt.Checked:QLineEdit.Normal}[state]))
+		self.passcode_visibility_checkbox.stateChanged.connect(lambda state: self.passcode_edit.setEchoMode({Qt.CheckState.Unchecked.value:QLineEdit.EchoMode.Password, Qt.CheckState.Checked.value:QLineEdit.EchoMode.Normal}[state]))
 		widget.layout().addWidget(self.passcode_edit)
 		widget.layout().addWidget(self.passcode_visibility_checkbox)
 		parameters_layout.addWidget(widget)
@@ -319,7 +319,7 @@ class AuthorizationPanel( QFrame ):
 		self.passcode_display.setText(AuthorizationManager.get_temp_passcode())
 
 	def event( self, event ):
-		if event.type() == QEvent.User + 2:
+		if event.type() == QEvent.Type.User + 2:
 			self._request_authorization( event.device )
 				
 			return True
@@ -327,7 +327,7 @@ class AuthorizationPanel( QFrame ):
 
 	def request_authorization(self, device):
 		self.authorization = False
-		event = QEvent(QEvent.User + 2)
+		event = QEvent(QEvent.Type.User + 2)
 		event.device = device
 		QCoreApplication.postEvent(self, event )
 		with self.cv:
@@ -338,15 +338,15 @@ class AuthorizationPanel( QFrame ):
 
 	def _request_authorization(self, device):
 		msg = QMessageBox()
-		msg.setIcon(QMessageBox.Question)
+		msg.setIcon(QMessageBox.Icon.Question)
 
 		msg.setText("Unknown device is trying to connect from " + device.websockets[0].remote_address[0] + ". Allow?")
 		msg.setWindowTitle("New device")
-		msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+		msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
-		retval = msg.exec_()
+		retval = msg.exec()
 
-		self.authorization = retval == QMessageBox.Yes
+		self.authorization = retval == QMessageBox.StandardButton.Yes
 		with self.cv:
 			self.cv.notify()
 
