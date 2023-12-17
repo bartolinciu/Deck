@@ -16,15 +16,13 @@ from PyQt6.QtWidgets import *
 
 from Deck.DeckDevice import DeckDevice
 from Deck.DeckController import DeckController
-from Deck.Gui.Layout import LayoutsPage
-from Deck.Gui.Device import DevicesPage
-from Deck.Gui.Macros import MacrosPage
-from Deck.Gui.Settings import SettingsPage
-from Deck.Gui.Bindings import BindingsPage
-
+from Gui.Layout import LayoutsPage
+from Gui.Device import DevicesPage
+from Gui.Macros import MacrosPage
+from Gui.Settings import SettingsPage
+from Gui.Bindings import BindingsPage
 
 import queue
-#import win32gui, win32process, psutil
 
 
 class MainWindow(QMainWindow):
