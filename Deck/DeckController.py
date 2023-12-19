@@ -27,8 +27,12 @@ class DeckController:
 	network_filename = "network.json"
 	network_path = os.path.join( Deck.config_path, network_filename )
 	def __init__(self):
-		with open( self.network_path, "rt" ) as f:
-			self.network_configuration = json.loads( f.read() )
+
+		if os.path.isfile(self.network_path):
+			with open( self.network_path, "rt" ) as f:
+				self.network_configuration = json.loads( f.read() )
+		else:
+			self.network_configuration = []
 
 		ips = self.get_ips_from_configuration(self.network_configuration)
 		self.srv = DeckServer( ips, 8080 )
