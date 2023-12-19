@@ -23,9 +23,13 @@ class MacroManager:
 	macro_file_name = "macros.json"
 	macro_file_path = os.path.join( Deck.config_path, macro_file_name )
 	def __init__(self):
-		with open( self.macro_file_path ) as f:
-			data = f.read()
-			self.macros = json.loads(data)
+		if os.path.isfile( self.macro_file_path ):
+			with open( self.macro_file_path ) as f:
+				data = f.read()
+				self.macros = json.loads(data)
+		else:
+			self.macros = {}
+			self.save()
 
 	def get_macro(self, name):
 		return self.macros[name]
@@ -38,11 +42,12 @@ class MacroManager:
 			self.macros[name] = macro
 		else:
 			self.macros.pop(name)
+		self.save()
+		
+	def save(self):
 		with open( self.macro_file_path, "wt" ) as f:
 			data = json.dumps( self.macros, indent = "\t" )
 			f.write( data )
-
-
 
 	def execute_macro(self, name):
 		macro = self.macros[name]
@@ -86,10 +91,5 @@ class MacroManager:
 
 					case "move":
 						mouse.move( step["x"], step["y"] )
-
-
-
-				
-
 
 manager = MacroManager()
