@@ -12,7 +12,7 @@ class DeckDevice:
 		self.server = server
 		self.websockets = [ websocket ]
 		self.onMessageListeners = []
-		self.config = DeviceManager.DeviceConfig("0000000000000000")
+		self.config = None
 		self.loop = asyncio.get_running_loop()
 		self.handler = None
 		self.defunct = False
@@ -26,11 +26,15 @@ class DeckDevice:
 		self.loop.create_task(self.set_layout_async(layout_name, layout)  )
 
 	def merge(self, target_uuid):
+		if not self.ready:
+			return
 		self.send_message("merge:"+target_uuid)
 		self.forget()
 		self.disconnect(reconnect = True)
 
 	async def set_layout_async(self, layout_name, layout):
+		if not self.ready:
+			return
 		if self.config.get_layout == layout_name and self.layout == layout:
 			return
 			
@@ -74,24 +78,36 @@ class DeckDevice:
 		self.onMessageListeners.sort( key = lambda x: x[0])
 
 	def rename_layout(self, new_name):
+		if not self.ready:
+			return
 		self.config.set_layout(new_name)
 
 	def get_layout_id(self):
+		if not self.ready:
+			return ""
 		return self.config.get_layout()
 
 	def get_name(self):
+		if not self.ready:
+			return ""
 		return self.config.get_name()
 
 	def set_name(self, name):
+		if not self.ready:
+			return
 		self.config.set_name(name)
 
 	def set_event_handler(self, handler):
 		self.handler = handler
 
 	def get_uuid(self):
+		if not self.ready:
+			return ""
 		return self.config.get_uuid()
 
 	def forget(self):
+		if not self.ready:
+			return
 		self.defunct = True
 		DeviceManager.device_manager.delete_device(self.config)
 
