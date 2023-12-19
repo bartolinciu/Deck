@@ -202,6 +202,9 @@ class DeckController:
 		message_str = str(message)
 
 		layout = LayoutManager.layout_manager.get_layout( device.get_layout_id() )
+		if layout == None:
+			print("Empty layout")
+			return
 
 		if not message_str in layout:
 			print("Button not found:", message_str)
@@ -231,6 +234,8 @@ class DeckController:
 
 	async def on_connect(self, device, is_repeated):
 		layout = LayoutManager.layout_manager.get_layout( device.get_layout_id() )
+		if layout == None:
+			layout = LayoutManager.LayoutManager.empty_layout
 		await device.set_layout_async(device.get_layout_id(),layout)
 		if not is_repeated:
 			device.addOnMessageListener( self, 1 )

@@ -485,6 +485,7 @@ class LayoutWidget(QWidget):
 		horizontal.addLayout(self.right_side_stack)
 
 		self.buttons = []
+		self.current_layout = None
 
 		self.skip_parameter_save = False
 		stylesheet = """QToolButton{
@@ -518,35 +519,38 @@ QToolButton:checked{
 		layout_manager.add_rename_listener( self, 2 )
 
 	def on_rename(self, old_name, new_name):
-		if self.layout_name == old_name:
-			self.layout_name = new_name
+		if self.current_layout_name == old_name:
+			self.current_layout_name = new_name
 
 	def refresh(self):
 		self.button_parameters.refresh()
-		if self.layout_name:
-			self.set_layout(self.layout_name)
+		if self.current_layout_name:
+			self.set_layout(self.current_layout_name)
 
 	def on_image_update(self, old_name, new_name):
-		self.set_layout(self.layout_name)
+		self.set_layout(self.current_layout_name)
 
 	def parameters_changed(self, button):
 		if self.current_button >= 0:
-			self.layout[ str(self.current_button+1) ] = button
-			layout_manager.update_layout(self.layout_name, self.layout, visual_change = False)
+			self.current_layout[ str(self.current_button+1) ] = button
+			layout_manager.update_layout(self.current_layout_name, self.current_layout, visual_change = False)
 
 	def button_appearance_changed(self, button):
 		if self.current_button >= 0:
 			self.buttons[self.current_button].setText( button["name"] )
-			self.layout[ str(self.current_button+1) ] = button
-			layout_manager.update_layout(self.layout_name, self.layout, visual_change = True)
+			self.current_layout[ str(self.current_button+1) ] = button
+			layout_manager.update_layout(self.current_layout_name, self.current_layout, visual_change = True)
 
 	def button_selected( self, i ):
-		self.right_side_stack.setCurrentIndex(1)
 		if self.current_button >= 0:
 			self.buttons[self.current_button].setChecked(False)
 		self.current_button = i
+
+		if self.current_layout == None:
+			return
 		self.edited_by_code = True
-		self.button_parameters.set_button( self.layout[str(self.current_button + 1)] )
+		self.button_parameters.set_button( self.current_layout[str(self.current_button + 1)] )
+		self.right_side_stack.setCurrentIndex(1)
 		
 	def resizeEvent( self, event ):
 		for button in self.buttons:
@@ -557,10 +561,13 @@ QToolButton:checked{
 		if self.current_button >= 0:
 			self.buttons[self.current_button].setChecked(False)
 		self.current_button = -1
-		self.layout = layout_manager.get_layout(layout_name)
-		self.layout_name = layout_name
+		layout = layout_manager.get_layout(layout_name)
+		self.current_layout = layout
+		self.current_layout_name = layout_name
+		if layout == None:
+			return
 		for i in range(16):
-			button = self.layout[str(i+1)]
+			button = self.current_layout[str(i+1)]
 			self.buttons[i].setText( button["name"] )
 			icon = QIcon()
 			self.buttons[i].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextOnly )
@@ -578,8 +585,8 @@ QToolButton:checked{
 	def change_button_name(self):
 		if self.current_button >= 0:
 			self.buttons[ self.current_button ].setText( self.name_box.text() )
-			self.layout[str(self.current_button+1)]["name"] = self.name_box.text()
-			layout_manager.update_layout(self.layout_name, self.layout)
+			self.current_layout[str(self.current_button+1)]["name"] = self.name_box.text()
+			layout_manager.update_layout(self.current_layout_name, self.current_layout)
 
 class ToolButton( QToolButton ):
 	def paintEvent(self, event):
@@ -609,8 +616,8 @@ class LayoutValidator( QValidator ):
 class LayoutsPage(QWidget):
 	def __init__(self, *args, **kwargs):
 		super(LayoutsPage, self).__init__(*args, **kwargs)
-		self.layoutSelector = QComboBox()
-		self.layoutWidget = LayoutWidget()
+		self.current_layoutSelector = QComboBox()
+		self.current_layoutWidget = LayoutWidget()
 		top_layout = QHBoxLayout()
 		layout_menu_button = ToolButton()
 		self.option1 = QAction("New")
@@ -640,40 +647,40 @@ class LayoutsPage(QWidget):
 		layout_menu_button.setText("\u2022\u2022\u2022")
 		layout_menu_button.setPopupMode( QToolButton.ToolButtonPopupMode.InstantPopup )
 
-		top_layout.addWidget( self.layoutSelector )
+		top_layout.addWidget( self.current_layoutSelector )
 		top_layout.addWidget(layout_menu_button)
 
 		self.list_layouts()
 
-		self.layoutSelector.setInsertPolicy(QComboBox.InsertPolicy.InsertAtCurrent)		
+		self.current_layoutSelector.setInsertPolicy(QComboBox.InsertPolicy.InsertAtCurrent)		
 
-		self.layoutSelector.currentIndexChanged.connect(self.select_layout)
+		self.current_layoutSelector.currentIndexChanged.connect(self.select_layout)
 		
 		self.select_layout()
 
 		vertical = QVBoxLayout()
 		vertical.addLayout(top_layout)
-		vertical.addWidget(self.layoutWidget)
+		vertical.addWidget(self.current_layoutWidget)
 
 		self.stashed_layout = None
 
 		self.setLayout(vertical)
 
 	def list_layouts(self):
-		self.layoutSelector.blockSignals(True)
-		self.layoutSelector.clear()
+		self.current_layoutSelector.blockSignals(True)
+		self.current_layoutSelector.clear()
 		for layout in layout_manager.get_layout_list():
-			self.layoutSelector.addItem( layout )
-		self.layoutSelector.blockSignals(False)
+			self.current_layoutSelector.addItem( layout )
+		self.current_layoutSelector.blockSignals(False)
 
 	def select_layout(self):
-		layout = self.layoutSelector.currentText()
-		self.layoutWidget.set_layout(layout)
+		layout = self.current_layoutSelector.currentText()
+		self.current_layoutWidget.set_layout(layout)
 
 	def new_layout(self):
 		name = layout_manager.new_layout()
-		self.layoutSelector.addItem(name)
-		self.layoutSelector.setCurrentIndex( self.layoutSelector.count()-1 )
+		self.current_layoutSelector.addItem(name)
+		self.current_layoutSelector.setCurrentIndex( self.current_layoutSelector.count()-1 )
 
 	def import_layout(self):
 		text_filter = "Layout files (*.json)"
@@ -689,27 +696,27 @@ class LayoutsPage(QWidget):
 			retval = msg.exec()
 		else:
 			self.list_layouts()
-			self.layoutSelector.setCurrentIndex(self.layoutSelector.count()-1)
+			self.current_layoutSelector.setCurrentIndex(self.current_layoutSelector.count()-1)
 
 
 	def rename_layout(self):
-		self.stashed_layout = self.layoutSelector.currentText()
-		self.layoutSelector.setEditable(True)
-		self.layoutSelector.lineEdit().editingFinished.connect( self.layout_renamed )
-		validator = LayoutValidator( self.layoutSelector.currentText(), layout_manager.get_layout_list())
-		self.layoutSelector.setValidator( validator )
+		self.stashed_layout = self.current_layoutSelector.currentText()
+		self.current_layoutSelector.setEditable(True)
+		self.current_layoutSelector.lineEdit().editingFinished.connect( self.current_layout_renamed )
+		validator = LayoutValidator( self.current_layoutSelector.currentText(), layout_manager.get_layout_list())
+		self.current_layoutSelector.setValidator( validator )
 
 	def layout_renamed(self):
-		self.layoutSelector.setEditable(False)
-		if self.stashed_layout != self.layoutSelector.currentText():
-			layout_manager.rename_layout( self.stashed_layout, self.layoutSelector.currentText() )
-			self.layoutWidget.refresh()
+		self.current_layoutSelector.setEditable(False)
+		if self.stashed_layout != self.current_layoutSelector.currentText():
+			layout_manager.rename_layout( self.stashed_layout, self.current_layoutSelector.currentText() )
+			self.current_layoutWidget.refresh()
 
 	def duplicate_layout(self):
-		new_layout = layout_manager.duplicate_layout( self.layoutSelector.currentText() )
+		new_layout = layout_manager.duplicate_layout( self.current_layoutSelector.currentText() )
 		if new_layout:
-			self.layoutSelector.insertItem( self.layoutSelector.currentIndex()+1, new_layout )
-			self.layoutSelector.setCurrentIndex( self.layoutSelector.currentIndex()+1 )
+			self.current_layoutSelector.insertItem( self.current_layoutSelector.currentIndex()+1, new_layout )
+			self.current_layoutSelector.setCurrentIndex( self.current_layoutSelector.currentIndex()+1 )
 		else:
 			msg = QMessageBox()
 			msg.setIcon(QMessageBos.Icon.Warning)
@@ -725,10 +732,10 @@ class LayoutsPage(QWidget):
 
 		file = QFileDialog.getSaveFileName( parent = self, caption = "Save layout", filter = text_filter )[0]
 
-		layout_manager.export_layout(self.layoutSelector.currentText(), file)
+		layout_manager.export_layout(self.current_layoutSelector.currentText(), file)
 
 	def delete_layout(self):
-		layout_manager.update_layout( self.layoutSelector.currentText(), None )
+		layout_manager.update_layout( self.current_layoutSelector.currentText(), None )
 		self.list_layouts()
 		self.select_layout()
 
