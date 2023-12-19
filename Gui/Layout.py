@@ -69,10 +69,14 @@ class ActionParametersWidget( QFrame ):
 	def set_parameters( self, parameters ):
 		self.setting_parameters = True
 		self.parameters = parameters
-		for i, parameter in enumerate(parameters):
+		for i, parameter in enumerate(parameters[:len(self.parameters_description)]  ):
+			print( self.layout().rowCount(), self.parameters_description )
 			if i >= self.layout().rowCount():
 				break
-			widget = self.layout().itemAtPosition( i, 1 ).widget()
+			item = self.layout().itemAtPosition( i, 1 )
+			if item == None:
+				continue
+			widget = item.widget()
 
 			match self.parameters_description[i]["type"]:
 				case "List":
@@ -118,21 +122,26 @@ class ActionParametersWidget( QFrame ):
 
 	def reset(self):
 		self.setting_parameters = True
+		self.parameters = []
 		for i, parameter in enumerate(self.parameters_description):
 			widget = self.layout().itemAtPosition( i, 1 ).widget()
 			match parameter["type"]:
 				case "List":
 					widget.setCurrentIndex(0)
-					self.parameters[i] = widget.currentText()
+					self.parameters.append( widget.currentText() )
 
 				case "Boolean":
 					widget.setChecked(False)
-					self.parameters[i] = False
+					self.parameters.append( False )
 
 				case "Text":
 					widget.setText("")
-					self.parameters[i] = ""
+					self.parameters.append( "" )
+
 		self.setting_parameters = False
+
+	def get_parameters(self):
+		return self.parameters
 
 
 class ImagePropertiesDialog( QDialog ):
@@ -437,6 +446,7 @@ class ButtonPropertiesPanel(QWidget):
 			self.parameter_stack.currentWidget().reset()
 			if self.button != None:
 				self.button["action"] = self.action_box.currentData()
+				self.button["parameters"] = self.parameter_stack.currentWidget().get_parameters()
 				self.parameters_changed.emit( self.button )
 
 
@@ -477,10 +487,27 @@ class LayoutWidget(QWidget):
 		self.buttons = []
 
 		self.skip_parameter_save = False
+		stylesheet = """QToolButton{
+	width: 22%;
+	height: 21%;
+	margin-left: 2%;
+	margin-top: 2%;
+	margin-bottom: 0;
+	margin-right: 0;
+	vertical-align: top;
+	background-color: lightblue;
+	border-radius: 5%;
+}
+QToolButton:checked{
+	background-color: blue;
+}
+
+"""
 
 		for i in range(16):
 			button = QToolButton()
 			button.setCheckable(True)
+			button.setStyleSheet(stylesheet)
 			button.pressed.connect( lambda i = i: self.button_selected(i) )
 			self.buttons.append(button)
 
