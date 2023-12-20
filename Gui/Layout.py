@@ -70,7 +70,6 @@ class ActionParametersWidget( QFrame ):
 		self.setting_parameters = True
 		self.parameters = parameters
 		for i, parameter in enumerate(parameters[:len(self.parameters_description)]  ):
-			print( self.layout().rowCount(), self.parameters_description )
 			if i >= self.layout().rowCount():
 				break
 			item = self.layout().itemAtPosition( i, 1 )
@@ -535,9 +534,19 @@ QToolButton:checked{
 			self.current_layout[ str(self.current_button+1) ] = button
 			layout_manager.update_layout(self.current_layout_name, self.current_layout, visual_change = False)
 
+
 	def button_appearance_changed(self, button):
 		if self.current_button >= 0:
 			self.buttons[self.current_button].setText( button["name"] )
+			if "image" in button and button["image"]!=None:
+				definition = ImageManager.get_image_definition( button["image"] )
+				if definition:
+					pixmap = QPixmap( ImageManager.hosting_path_to_filesystem_path(definition["hostingPath"]) )
+					pixmap = pixmap.scaled( QSize(45,40), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation )
+					icon = QIcon(pixmap)
+					self.buttons[self.current_button].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextUnderIcon )
+			else:
+				self.buttons[self.current_button].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextOnly )
 			self.current_layout[ str(self.current_button+1) ] = button
 			layout_manager.update_layout(self.current_layout_name, self.current_layout, visual_change = True)
 
