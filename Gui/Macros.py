@@ -346,7 +346,7 @@ class StepProperties(QFrame):
 			self.step["button"] = self.button.currentData()
 			self.properties_changed.emit( self.step )
 
-	def count_changed( self, count ):
+	def count_changed( self ):
 		self.step["count"] = int(self.count.text())
 		self.properties_changed.emit( self.step )
 
@@ -382,7 +382,10 @@ class StepProperties(QFrame):
 					case 2:
 						self.show_parameters( self.flag_button | self.flag_count )
 						self.button.setCurrentIndex( self.button.findData(step["button"]) )
-						self.count.setText( str( step["count"] ) )
+						count = "0"
+						if "count" in step:
+							count = str( step["count"] )
+						self.count.setText( count )
 
 					case 3 | 4 | 5:
 						self.show_parameters( self.flag_x | self.flag_y )
