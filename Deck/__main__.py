@@ -10,16 +10,17 @@ parser.add_argument("-b", "--base")
 parser.add_argument("-l", "--layouts")
 parser.add_argument("-d", "--devices")
 
+args = parser.parse_args()
 
-if parser.base != None:
-	Deck.base_path = parser.base
+if args.base != None:
+	Deck.base_path = args.base
 	Deck.config_path = os.path.join(Deck.base_path, "config")
 	Deck.devices_path = os.path.join(Deck.base_path, "devices")
 	Deck.layouts_path = os.path.join(Deck.base_path, "layouts")
 	Deck.web_path = os.path.join(Deck.base_path, "web")
 
 
-args = parser.parse_args()
+
 
 if args.config != None:
 	Deck.config_path = args.config
