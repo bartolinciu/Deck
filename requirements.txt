@@ -6,6 +6,8 @@
 #
 colorama==0.4.6
     # via qrcode
+ifaddr==0.2.0
+    # via -r requirements.in
 pillow==10.1.0
     # via -r requirements.in
 psutil==5.9.7
