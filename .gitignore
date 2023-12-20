@@ -1,5 +1,7 @@
 devices/*
 Deck/__pycache__/*
-Deck/Gui/__pycache__/*
+Gui/__pycache__/*
 Deck/actions/__pycache__/*
-ifaddr/__pycache__/*
+Deck/data/config/*
+Deck/data/devices/*
+Deck/data/layouts/*
