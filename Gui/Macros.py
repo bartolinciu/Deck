@@ -444,6 +444,7 @@ class MacrosPage(QWidget):
 
 		self.macroSelector = ScrollableButtonSelector()
 		self.stepSelector = ScrollableButtonSelector()
+		self.macro = None
 		
 		for macro in manager.get_macro_list():
 			self.macroSelector.add_button( macro, macro )
@@ -517,6 +518,8 @@ class MacrosPage(QWidget):
 
 
 	def macro_name_changed( self, name ):
+		if self.macro == None:
+			return
 		self.macroSelector.edit_button( self.macroSelector.current_button, name, name )
 		manager.set_macro(self.macro_name, None)
 		manager.set_macro(name, self.macro)
@@ -525,6 +528,10 @@ class MacrosPage(QWidget):
 
 
 	def move_step_up(self):
+		if self.macro == None:
+			return
+		if self.current_step < 1:
+			return
 		step = self.macro[self.current_step]
 		self.macro = self.macro[:self.current_step] + self.macro[self.current_step+1:]
 		self.stepSelector.move_button( self.current_step, self.current_step-1 )
@@ -534,6 +541,10 @@ class MacrosPage(QWidget):
 
 
 	def move_step_down(self):
+		if self.macro == None:
+			return
+		if self.current_step >= len(self.macro)-1:
+			return
 		step = self.macro[self.current_step]
 		self.macro = self.macro[:self.current_step] + self.macro[self.current_step+1:]
 		self.stepSelector.move_button( self.current_step, self.current_step+1 )
@@ -542,19 +553,30 @@ class MacrosPage(QWidget):
 		manager.set_macro( self.macro_name, self.macro )
 
 	def delete_macro( self ):
+		if self.macro == None:
+			return
 		self.macroSelector.remove_item( self.macroSelector.current_button )
 		manager.set_macro( self.macro_name, None )
+		self.macro = None
+		self.stack.setCurrentIndex(0)
+
 
 	def add_step(self):
+		if self.macro == None:
+			return
 		step = {"delay":0, "device":"keyboard", "action":"press", "key":""}
 		self.macro.append( step )
 		self.stepSelector.add_button( "press", step )
 		manager.set_macro( self.macro_name, self.macro )
 
 	def remove_step(self):
+		if self.macro == None:
+			return
 		self.macro = self.macro[:self.current_step] + self.macro[self.current_step+1:]
 		self.stepSelector.remove_item( self.current_step )
 		manager.set_macro(self.macro_name, self.macro)
+		self.stack.setCurrentIndex(1)
+
 
 
 	def create_macro( self ):
