@@ -23,6 +23,8 @@ class MacroManager:
 	macro_file_name = "macros.json"
 	macro_file_path = os.path.join( Deck.config_path, macro_file_name )
 	def __init__(self):
+		if not os.path.isdir( Deck.config_path ):
+			os.makedirs(Deck.config_path)
 		if os.path.isfile( self.macro_file_path ):
 			with open( self.macro_file_path ) as f:
 				data = f.read()

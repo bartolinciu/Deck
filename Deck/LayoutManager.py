@@ -32,6 +32,8 @@ class LayoutManager:
 		self.loaded_layouts = {}
 		self.update_listeners = []
 		self.rename_listeners = []
+		if not os.path.isdir( Deck.layout_path ):
+			os.makedirs(Deck.layout_path)
 
 	def update_images( self, old_image, new_image ):
 		for layout_name in self.layouts:

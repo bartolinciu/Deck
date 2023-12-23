@@ -10,6 +10,8 @@ class AuthorizationManager:
 	auth_file_name = "auth.json"
 	auth_file_path = os.path.join( Deck.config_path , auth_file_name )
 	def __init__(self, path = None):
+		if not os.path.isdir( Deck.config_path ):
+			os.makedirs(Deck.config_path)
 		if not os.path.isfile(self.auth_file_path):
 			self.config = {"method": "all", "passcode":"", "blacklist": []}
 			self.save()

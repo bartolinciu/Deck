@@ -28,6 +28,9 @@ class DeckController:
 	network_path = os.path.join( Deck.config_path, network_filename )
 	def __init__(self):
 
+		if not os.path.isdir( Deck.config_path ):
+			os.makedirs(Deck.config_path)
+		
 		if os.path.isfile(self.network_path):
 			with open( self.network_path, "rt" ) as f:
 				self.network_configuration = json.loads( f.read() )

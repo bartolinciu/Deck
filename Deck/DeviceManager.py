@@ -61,6 +61,8 @@ class DeviceManager:
 		self.configs = {}
 
 	def load_devices(self):
+		if not os.path.isdir( devicesPath ):
+			os.makedirs(devicesPath)
 		for root, dirs, files in os.walk( devicesPath ):
 			for name in files:
 				

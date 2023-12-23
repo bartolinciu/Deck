@@ -11,6 +11,8 @@ class ImageManager:
 	image_path = os.path.join( Deck.config_path, image_filename )
 	def __init__(self):
 		self.update_listeners = []
+		if not os.path.isdir( Deck.config_path ):
+			os.makedirs(Deck.config_path)
 		if not os.path.isfile( self.image_path ):
 			self.images = {}
 			with open( self.image_path, "wt" ) as f:

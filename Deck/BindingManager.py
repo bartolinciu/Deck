@@ -7,6 +7,8 @@ class BindingManager:
 	binding_file_name = "binding.json"
 	binding_file_path = os.path.join( Deck.config_path , binding_file_name )
 	def __init__(self, path = None):
+		if not os.path.isdir( Deck.config_path ):
+			os.makedirs(Deck.config_path)
 		if not os.path.isfile(self.binding_file_path):
 			self.bindings = []
 			self.save()
