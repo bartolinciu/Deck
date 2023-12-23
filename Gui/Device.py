@@ -83,7 +83,14 @@ class DevicePropertiesWidget(QFrame):
 		for layout in LayoutManager.get_layout_list():
 			self.layout_selector.addItem(layout)
 
+		if self.properties != None:
+			self.layout_selector.setCurrentIndex( self.layout_selector.findText(self.properties.get_layout()) )
+
 		self.set_by_code = set_by_code
+
+	def showEvent(self, event):
+		self.list_layouts()
+
 
 	def name_changed(self):
 		if self.properties == None:
