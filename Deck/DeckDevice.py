@@ -37,9 +37,13 @@ class DeckDevice:
 			return
 		if self.config.get_layout == layout_name and self.layout == layout:
 			return
-			
+		
+		if layout == None:
+			layout = LayoutManager.empty_layout
+
 		self.config.set_layout(layout_name)
 		self.layout = layout
+
 
 		def get_image(button):
 			if "image" in button:
