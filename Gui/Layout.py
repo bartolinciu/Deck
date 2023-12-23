@@ -625,7 +625,7 @@ class LayoutValidator( QValidator ):
 class LayoutsPage(QWidget):
 	def __init__(self, *args, **kwargs):
 		super(LayoutsPage, self).__init__(*args, **kwargs)
-		self.current_layoutSelector = QComboBox()
+		self.layoutSelector = QComboBox()
 		self.current_layoutWidget = LayoutWidget()
 		top_layout = QHBoxLayout()
 		layout_menu_button = ToolButton()
@@ -656,14 +656,14 @@ class LayoutsPage(QWidget):
 		layout_menu_button.setText("\u2022\u2022\u2022")
 		layout_menu_button.setPopupMode( QToolButton.ToolButtonPopupMode.InstantPopup )
 
-		top_layout.addWidget( self.current_layoutSelector )
+		top_layout.addWidget( self.layoutSelector )
 		top_layout.addWidget(layout_menu_button)
 
 		self.list_layouts()
 
-		self.current_layoutSelector.setInsertPolicy(QComboBox.InsertPolicy.InsertAtCurrent)		
+		self.layoutSelector.setInsertPolicy(QComboBox.InsertPolicy.InsertAtCurrent)		
 
-		self.current_layoutSelector.currentIndexChanged.connect(self.select_layout)
+		self.layoutSelector.currentIndexChanged.connect(self.select_layout)
 		
 		self.select_layout()
 
@@ -676,20 +676,20 @@ class LayoutsPage(QWidget):
 		self.setLayout(vertical)
 
 	def list_layouts(self):
-		self.current_layoutSelector.blockSignals(True)
-		self.current_layoutSelector.clear()
+		self.layoutSelector.blockSignals(True)
+		self.layoutSelector.clear()
 		for layout in layout_manager.get_layout_list():
-			self.current_layoutSelector.addItem( layout )
-		self.current_layoutSelector.blockSignals(False)
+			self.layoutSelector.addItem( layout )
+		self.layoutSelector.blockSignals(False)
 
 	def select_layout(self):
-		layout = self.current_layoutSelector.currentText()
+		layout = self.layoutSelector.currentText()
 		self.current_layoutWidget.set_layout(layout)
 
 	def new_layout(self):
 		name = layout_manager.new_layout()
-		self.current_layoutSelector.addItem(name)
-		self.current_layoutSelector.setCurrentIndex( self.current_layoutSelector.count()-1 )
+		self.layoutSelector.addItem(name)
+		self.layoutSelector.setCurrentIndex( self.layoutSelector.count()-1 )
 
 	def import_layout(self):
 		text_filter = "Layout files (*.json)"
@@ -705,27 +705,27 @@ class LayoutsPage(QWidget):
 			retval = msg.exec()
 		else:
 			self.list_layouts()
-			self.current_layoutSelector.setCurrentIndex(self.current_layoutSelector.count()-1)
+			self.layoutSelector.setCurrentIndex(self.layoutSelector.count()-1)
 
 
 	def rename_layout(self):
-		self.stashed_layout = self.current_layoutSelector.currentText()
-		self.current_layoutSelector.setEditable(True)
-		self.current_layoutSelector.lineEdit().editingFinished.connect( self.current_layout_renamed )
-		validator = LayoutValidator( self.current_layoutSelector.currentText(), layout_manager.get_layout_list())
-		self.current_layoutSelector.setValidator( validator )
+		self.stashed_layout = self.layoutSelector.currentText()
+		self.layoutSelector.setEditable(True)
+		self.layoutSelector.lineEdit().editingFinished.connect( self.layout_renamed )
+		validator = LayoutValidator( self.layoutSelector.currentText(), layout_manager.get_layout_list())
+		self.layoutSelector.setValidator( validator )
 
 	def layout_renamed(self):
-		self.current_layoutSelector.setEditable(False)
-		if self.stashed_layout != self.current_layoutSelector.currentText():
-			layout_manager.rename_layout( self.stashed_layout, self.current_layoutSelector.currentText() )
+		self.layoutSelector.setEditable(False)
+		if self.stashed_layout != self.layoutSelector.currentText():
+			layout_manager.rename_layout( self.stashed_layout, self.layoutSelector.currentText() )
 			self.current_layoutWidget.refresh()
 
 	def duplicate_layout(self):
-		new_layout = layout_manager.duplicate_layout( self.current_layoutSelector.currentText() )
+		new_layout = layout_manager.duplicate_layout( self.layoutSelector.currentText() )
 		if new_layout:
-			self.current_layoutSelector.insertItem( self.current_layoutSelector.currentIndex()+1, new_layout )
-			self.current_layoutSelector.setCurrentIndex( self.current_layoutSelector.currentIndex()+1 )
+			self.layoutSelector.insertItem( self.layoutSelector.currentIndex()+1, new_layout )
+			self.layoutSelector.setCurrentIndex( self.layoutSelector.currentIndex()+1 )
 		else:
 			msg = QMessageBox()
 			msg.setIcon(QMessageBos.Icon.Warning)
@@ -741,10 +741,10 @@ class LayoutsPage(QWidget):
 
 		file = QFileDialog.getSaveFileName( parent = self, caption = "Save layout", filter = text_filter )[0]
 
-		layout_manager.export_layout(self.current_layoutSelector.currentText(), file)
+		layout_manager.export_layout(self.layoutSelector.currentText(), file)
 
 	def delete_layout(self):
-		layout_manager.update_layout( self.current_layoutSelector.currentText(), None )
+		layout_manager.update_layout( self.layoutSelector.currentText(), None )
 		self.list_layouts()
 		self.select_layout()
 
