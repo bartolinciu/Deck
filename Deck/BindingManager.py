@@ -31,8 +31,10 @@ class BindingManager:
 		return self.bindings
 
 	def get_bindings_by_window(self, app, title):
-		app_bindings = [ binding for binding in self.bindings if binding["app"] == app ]
-		return [ binding for binding in app_bindings if binding["title"] == "*" or re.matcher(binding["title"]).match(title) ]
+		app_bindings = [ binding for binding in self.bindings if binding["app"] == app or binding["app"] == "*" ]
+		app_bindings.sort( key = lambda binding: binding["app"] == "*" )
+		
+		return [ binding for binding in app_bindings if binding["title"] == "*" or re.compile(binding["title"]).match(title) ]
 
 	def update_binding(self, i, binding):
 		self.bindings[i] = binding
