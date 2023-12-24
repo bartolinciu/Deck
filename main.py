@@ -9,6 +9,7 @@ from Gui.MainWindow import MainWindow
 
 import sys
 import threading
+import os
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
@@ -18,7 +19,7 @@ if __name__ == "__main__":
 	controller = DeckController()
 	window = MainWindow(controller)
 
-	icon = QIcon("icon.ico")
+	icon = QIcon( os.path.join(os.path.dirname(__file__), "icon.ico"))
 
 	tray = QSystemTrayIcon()
 	tray.setIcon(icon)
