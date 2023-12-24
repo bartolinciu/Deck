@@ -256,9 +256,12 @@ class DeckController:
 		self.running = True
 		self.window_watchdog.start()
 		while self.running:
-			while not self.ready:
-				time.sleep(0.01)
-			self.srv.run()
+			try:
+				while not self.ready:
+					time.sleep(0.01)
+				self.srv.run()
+			except KeyboardInterrupt:
+				self.running = False
 
 		
 

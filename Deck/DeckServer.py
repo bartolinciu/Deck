@@ -55,6 +55,13 @@ class DeckServer:
 			asyncio.run( self.serve_websocket() ) 
 		except KeyboardInterrupt:
 			self.server_running = False
+			self._stop_server()
+			raise
+
+		self.stop_server()
+		
+
+	def _stop_server(self):
 		for thread in self.threads:
 			thread.join()
 		print("http server stopped")
