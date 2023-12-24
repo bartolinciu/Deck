@@ -538,6 +538,7 @@ QToolButton:checked{
 	def button_appearance_changed(self, button):
 		if self.current_button >= 0:
 			self.buttons[self.current_button].setText( button["name"] )
+			icon = QIcon()
 			if "image" in button and button["image"]!=None:
 				definition = ImageManager.get_image_definition( button["image"] )
 				if definition:
@@ -545,8 +546,10 @@ QToolButton:checked{
 					pixmap = pixmap.scaled( QSize(45,40), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation )
 					icon = QIcon(pixmap)
 					self.buttons[self.current_button].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextUnderIcon )
+
 			else:
 				self.buttons[self.current_button].setToolButtonStyle( Qt.ToolButtonStyle.ToolButtonTextOnly )
+			self.buttons[self.current_button].setIcon(icon)
 			self.current_layout[ str(self.current_button+1) ] = button
 			layout_manager.update_layout(self.current_layout_name, self.current_layout, visual_change = True)
 
