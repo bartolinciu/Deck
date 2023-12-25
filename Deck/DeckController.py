@@ -36,6 +36,7 @@ class DeckController:
 				self.network_configuration = json.loads( f.read() )
 		else:
 			self.network_configuration = []
+			self.save()
 
 		ips = self.get_ips_from_configuration(self.network_configuration)
 		self.srv = DeckServer( ips, 8080 )
@@ -196,10 +197,13 @@ class DeckController:
 
 	def set_network_configuration(self, settings):
 		self.network_configuration = settings
-		with open( self.network_path, "wt") as f:
-			f.write( json.dumps( self.network_configuration, indent = "\t" ) )
+		self.save()
 		ips = self.get_ips_from_configuration(settings)
 		self.change_interfaces(ips)
+
+	def save(self):
+		with open( self.network_path, "wt") as f:
+			f.write( json.dumps( self.network_configuration, indent = "\t" ) )
 
 	async def on_message(self, device, message):
 
