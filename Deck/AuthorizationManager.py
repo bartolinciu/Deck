@@ -13,7 +13,7 @@ class AuthorizationManager:
 		if not os.path.isdir( Deck.config_path ):
 			os.makedirs(Deck.config_path)
 		if not os.path.isfile(self.auth_file_path):
-			self.config = {"method": "all", "passcode":"", "blacklist": []}
+			self.config = {"method": "all", "passcode":""}
 			self.save()
 		else:
 			with open( self.auth_file_path, "rt" ) as f:
