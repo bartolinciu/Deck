@@ -60,7 +60,8 @@ class DeckController:
 
 	def monitor_active_window(self):
 		import pywinctl
-		import pywintypes
+		if sys.platform == "win32":
+			import pywintypes
 		while self.running:
 			try:
 				window = pywinctl.getActiveWindow()
