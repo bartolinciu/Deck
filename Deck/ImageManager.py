@@ -5,6 +5,7 @@ import json
 import shutil
 
 import Deck
+import sys
 
 class ImageManager:
 	image_filename = "images.json"
@@ -71,7 +72,11 @@ class ImageManager:
 		self.save()
 
 	def hosting_path_to_filesystem_path(self, hosting_path):
-		return os.path.join(Deck.web_path, hosting_path)
+		path = os.path.abspath(os.path.join(Deck.web_path, hosting_path))
+		if sys.platform != "win32":
+			path = "/".join(path.split("\\"))
+		print(path)
+		return path
 
 	def update_image( self, old_name, new_definition ):
 		old_definition = self.images[ old_name ]
