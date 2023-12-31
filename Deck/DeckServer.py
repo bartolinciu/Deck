@@ -58,7 +58,7 @@ class DeckServer:
 			self._stop_server()
 			raise
 
-		self.stop_server()
+		self._stop_server()
 		
 
 	def _stop_server(self):
