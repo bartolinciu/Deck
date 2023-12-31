@@ -145,6 +145,51 @@ class KeyEdit(QLineEdit):
 		font.setWeight( QFont.Weight.Normal )
 		self.setFont(font)
 
+# if text == "":
+# 			value = 0
+# 		value_str = self.matcher.match( text).group(0) 
+# 		value_str = ".".join(value_str.split(","))
+# 		value = float( value_str )
+
+class DelayValidator(QValidator):
+	def fixup(self, value):
+		
+
+		last_decimal=0
+		found_point = False
+		for d in value:
+			if d == ".":
+				if not found_point:
+					found_point = True
+					last_decimal += 1
+					continue
+				else:
+					break
+			if not d.isdigit():
+				break
+
+			last_decimal += 1
+
+		value = value[:last_decimal]
+		if len(value) == 0:
+			value = "0"
+
+		return value + "s"
+
+	def validate(self, value, pos):
+		value = value.replace(",", ".")
+		
+		if pos > 0:
+			current_character = value[pos-1]
+			if current_character == "." and value.count(".") > 1 or \
+				current_character == "s" and pos != len(value) or \
+				not current_character.isdigit() and not current_character in ["s", "."]:
+				pos -= 1 
+				value = value[:pos] + value[pos+1:]
+
+		if value.count(".") <=1 and value.replace(".", "").isdecimal():
+			return (QValidator.State.Intermediate, value, pos)
+		return (QValidator.State.Acceptable, self.fixup(value), pos)
 
 class StepProperties(QFrame):
 	properties_changed = pyqtSignal( object )
@@ -242,6 +287,8 @@ class StepProperties(QFrame):
 		self.device_selector.currentIndexChanged.connect( self.device_changed )
 
 		self.delay.editingFinished.connect( self.delay_changed )
+		self.validator = DelayValidator()
+		self.delay.setValidator(self.validator)
 
 		self.mouse_action_selector.currentIndexChanged.connect( self.action_changed )
 		self.keyboard_action_selector.currentIndexChanged.connect( self.action_changed )
@@ -397,11 +444,9 @@ class StepProperties(QFrame):
 		
 
 	def delay_changed(self):
-		value_str = self.matcher.match( self.delay.text()).group(0) 
-		value_str = ".".join(value_str.split(","))
-		value = float( value_str )
-		self.step["delay"] = value
-		self.delay.setText( str(value) + "s" )
+		text = self.delay.text()
+		
+		self.step["delay"] = float(text[:-1])
 
 		self.properties_changed.emit( self.step )
 
