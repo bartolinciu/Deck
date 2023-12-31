@@ -62,6 +62,10 @@ class DeckController:
 		import pywinctl
 		if sys.platform == "win32":
 			import pywintypes
+			errortype = pywintypes.error
+		else:
+			import Xlib
+			errortype = Xlib.error.BadWindow
 		while self.running:
 			try:
 				window = pywinctl.getActiveWindow()
@@ -71,14 +75,16 @@ class DeckController:
 
 				window_changed = ( window != self.window )
 				app = ""
-				try:
-					if sys.platform == "win32":
+			
+				if sys.platform == "win32":
+					try:
 						pid = win32process.GetWindowThreadProcessId( window.getHandle() )[1]
 						app = psutil.Process(pid).exe().split("\\")[-1]
-					else:
-						app = window.getAppName()
-				except pywintypes.com_error:
-					pass
+					except pywintypes.com_error:
+						pass
+				else:
+					app = window.getAppName()
+				
 				title = window.title
 
 				
@@ -90,7 +96,7 @@ class DeckController:
 
 				if window_changed or app_changed or title_changed:
 					self.active_window_changed()
-			except pywintypes.error:
+			except errortype:
 				pass
 
 			time.sleep(0.05)
