@@ -496,6 +496,7 @@ class LayoutWidget(QWidget):
 	margin-right: 0;
 	vertical-align: top;
 	background-color: lightblue;
+	color:black;
 	border-radius: 5%;
 }
 QToolButton:checked{

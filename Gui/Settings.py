@@ -265,7 +265,7 @@ class AuthorizationPanel( QFrame ):
 		parameters_layout.addWidget( QWidget() ) #no parameters when accepting all devices
 
 		self.passcode_display = QLabel( AuthorizationManager.get_temp_passcode() )
-		self.passcode_display.setStyleSheet("QLabel{ background-color:black; font-size:30px; } QLabel:hover{background-color:transparent;}")
+		self.passcode_display.setStyleSheet("QLabel{ background-color:black;color:black; font-size:30px; } QLabel:hover{background-color:transparent;}")
 		self.passcode_display.setMaximumWidth( self.width()//2 )
 		self.passcode_display.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 		widget = QWidget()
