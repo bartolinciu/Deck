@@ -63,9 +63,11 @@ class DeckController:
 		if sys.platform == "win32":
 			import pywintypes
 			errortype = pywintypes.error
-		else:
+		elif sys.platform=="linux":
 			import Xlib
 			errortype = Xlib.error.BadWindow
+		else:
+                        errortype = Exception
 		while self.running:
 			try:
 				window = pywinctl.getActiveWindow()
@@ -96,8 +98,9 @@ class DeckController:
 
 				if window_changed or app_changed or title_changed:
 					self.active_window_changed()
-			except errortype:
-				pass
+			except errortype as e:
+                                print(e)
+                                pass
 
 			time.sleep(0.05)
 		print("stopping window watchdog")
