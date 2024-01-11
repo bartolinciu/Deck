@@ -5,7 +5,7 @@ import os
 
 parser = argparse.ArgumentParser( prog = "Deck", description = "Standalone deck controller" )
 parser.add_argument("-b", "--base", help = "Base directory for files with no specified location")
-parser.add_argument('-w', '--web', help="Location of web interface")
+parser.add_argument('-w', '--web', help="Location of the web interface")
 parser.add_argument("-c", "--config", help="Location of configuration files")
 parser.add_argument("-l", "--layouts", help = "Location of layout description files")
 parser.add_argument("-d", "--devices", help = "Location of device configuration files")
